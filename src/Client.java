@@ -149,18 +149,19 @@ public class Client{
     class setupButtonListener implements ActionListener{
         public void actionPerformed(ActionEvent e){
 
-            //System.out.println("Setup Button pressed !");
+            System.out.println("Setup Button pressed !");
 
             if (state == INIT)
             {
                 //Init non-blocking RTPsocket that will be used to receive data
                 try{
                     //construct a new DatagramSocket to receive RTP packets from the server, on port RTP_RCV_PORT
-                    //RTPsocket = ...
+                    RTPsocket = new DatagramSocket(RTP_RCV_PORT);
+
 
                     //set TimeOut value of the socket to 5msec.
-                    //....
-                    throw new SocketException();
+                    RTPsocket.setSoTimeout(5);
+
                 }
                 catch (SocketException se)
                 {
