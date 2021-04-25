@@ -160,7 +160,7 @@ public class Client{
 
                     //set TimeOut value of the socket to 5msec.
                     //....
-
+                    throw new SocketException();
                 }
                 catch (SocketException se)
                 {
