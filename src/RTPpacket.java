@@ -168,22 +168,20 @@ public class RTPpacket{
     //--------------------------
     //print headers without the SSRC
     //--------------------------
-    public void printheader()
-    {
+    public void printheader() {
         //TO DO: uncomment
-    /*
-    for (int i=0; i < (HEADER_SIZE-4); i++)
-      {
-	for (int j = 7; j>=0 ; j--)
-	  if (((1<<j) & header[i] ) != 0)
-	    System.out.print("1");
-	else
-	  System.out.print("0");
-	System.out.print(" ");
-      }
 
-    System.out.println();
-    */
+        for (int i = 0; i < (HEADER_SIZE - 4); i++) {
+            for (int j = 7; j >= 0; j--)
+                if (((1 << j) & header[i]) != 0)
+                    System.out.print("1");
+                else
+                    System.out.print("0");
+            System.out.print(" ");
+        }
+
+        System.out.println();
+
     }
 
     //return the unsigned value of 8-bit integer nb
