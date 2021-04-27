@@ -341,7 +341,7 @@ public class Client{
         try{
             //parse status line and extract the reply_code:
             String StatusLine = RTSPBufferedReader.readLine();
-            //System.out.println("RTSP Client - Received from Server:");
+            System.out.println("RTSP Client - Received from Server:");
             System.out.println(StatusLine);
 
             StringTokenizer tokens = new StringTokenizer(StatusLine);
@@ -361,6 +361,7 @@ public class Client{
                 tokens = new StringTokenizer(SessionLine);
                 tokens.nextToken(); //skip over the Session:
                 RTSPid = Integer.parseInt(tokens.nextToken());
+                System.out.println("(Debug) RTSPid value = " + RTSPid);
             }
         }
         catch(Exception ex)
