@@ -243,7 +243,7 @@ public class Server extends JFrame implements ActionListener {
         try{
             //parse request line and extract the request_type:
             String RequestLine = RTSPBufferedReader.readLine();
-            //System.out.println("RTSP Server - Received from Client:");
+            System.out.println("RTSP Server - Received from Client:");
             System.out.println(RequestLine);
 
             StringTokenizer tokens = new StringTokenizer(RequestLine);
@@ -269,8 +269,9 @@ public class Server extends JFrame implements ActionListener {
             String SeqNumLine = RTSPBufferedReader.readLine();
             System.out.println(SeqNumLine);
             tokens = new StringTokenizer(SeqNumLine);
-            tokens.nextToken();
+            tokens.nextToken(); // skips "CSeq: " text
             RTSPSeqNb = Integer.parseInt(tokens.nextToken());
+            System.out.println("(Debug) RTSPSeqNb = " + RTSPSeqNb);
 
             //get LastLine
             String LastLine = RTSPBufferedReader.readLine();
@@ -280,8 +281,9 @@ public class Server extends JFrame implements ActionListener {
             {
                 //extract RTP_dest_port from LastLine
                 tokens = new StringTokenizer(LastLine);
-                for (int i=0; i<3; i++)
-                    tokens.nextToken(); //skip unused stuff
+                // original line skips 3 tokens (why? we only need RTP_dest_port from this line, seemingly...)
+                //for (int i=0; i<3; i++) System.out.println("Skipping: " + tokens.nextToken()); //skip unused stuff
+                tokens.nextToken(); // Skip "Transport: "
                 RTP_dest_port = Integer.parseInt(tokens.nextToken());
             }
             //else LastLine will be the SessionId line ... do not check for now.
