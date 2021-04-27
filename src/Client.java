@@ -390,7 +390,6 @@ public class Client{
             //check if request_type is equal to "SETUP" and in this case write the Transport: line
             // advertising to the server the port used to receive the RTP packets RTP_RCV_PORT
             if(request_type.equals("SETUP")){
-                System.out.print("(Debug) It was a SETUP msg!");
                 RTSPBufferedWriter.write("Transport: " + RTP_RCV_PORT + CRLF);
             } else {
                 //otherwise, write the Session line from the RTSPid field
