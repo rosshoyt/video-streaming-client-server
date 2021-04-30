@@ -281,9 +281,8 @@ public class Server extends JFrame implements ActionListener {
             {
                 //extract RTP_dest_port from LastLine
                 tokens = new StringTokenizer(LastLine);
-                // original line skips 3 tokens (why? we only need RTP_dest_port from this line, seemingly...)
-                //for (int i=0; i<3; i++) System.out.println("Skipping: " + tokens.nextToken()); //skip unused stuff
-                tokens.nextToken(); // Skip "Transport: "
+                for (int i=0; i<3; i++)
+                    tokens.nextToken();
                 RTP_dest_port = Integer.parseInt(tokens.nextToken());
             }
             //else LastLine will be the SessionId line ... do not check for now.
