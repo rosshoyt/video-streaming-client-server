@@ -181,8 +181,8 @@ public class Client{
                 else
                 {
                     //change RTSP state and print new state
-                    //state = ....
-                    //System.out.println("New RTSP state: ....");
+                    state = READY;
+                    System.out.println("New RTSP state: READY");
                 }
             }//else if state != INIT then do nothing
         }
@@ -193,7 +193,9 @@ public class Client{
     class playButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e){
 
-            //System.out.println("Play Button pressed !");
+            System.out.println("Play Button pressed !");
+
+            send_RTSP_request("PLAY");
 
             if (state == READY)
             {
