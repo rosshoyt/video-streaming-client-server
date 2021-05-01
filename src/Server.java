@@ -1,7 +1,7 @@
-/* ------------------
-   Server
-   usage: java Server [RTSP listening port]
-   ---------------------- */
+/**
+ * Class which represents a streaming video server
+ * usage: java Server [RTSP listening port]
+ */
 import java.io.*;
 import java.net.*;
 import java.awt.*;
@@ -58,11 +58,10 @@ public class Server extends JFrame implements ActionListener {
 
     final static String CRLF = "\r\n";
 
-    //--------------------------------
-    //Constructor
-    //--------------------------------
+    /**
+     * Constructs the video streaming server
+     */
     public Server(){
-
         //init Frame
         super("Server");
 
@@ -87,9 +86,12 @@ public class Server extends JFrame implements ActionListener {
         getContentPane().add(label, BorderLayout.CENTER);
     }
 
-    //------------------------------------
-    //main
-    //------------------------------------
+    /**
+     * Main method which runs the server program
+     * @param argv RTSP listening port
+     * example: 1025
+     * @throws Exception
+     */
     public static void main(String argv[]) throws Exception
     {
         //create a Server object
@@ -123,21 +125,16 @@ public class Server extends JFrame implements ActionListener {
         while(!done)
         {
             request_type = theServer.parse_RTSP_request(); //blocking
-
             if (request_type == SETUP)
             {
                 done = true;
-
                 //update RTSP state
                 state = READY;
                 System.out.println("New RTSP state: READY");
-
                 //Send response
                 theServer.send_RTSP_response();
-
                 //init the VideoStream object:
                 theServer.video = new VideoStream(VideoFileName);
-
                 //init RTP socket
                 theServer.RTPsocket = new DatagramSocket();
             }
