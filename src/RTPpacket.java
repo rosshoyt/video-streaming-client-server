@@ -1,7 +1,8 @@
-//class RTPpacket
-
+/**
+ * Class which represents a RTP (Real-time Transport Protocol) packet
+ */
 public class RTPpacket{
-
+    
     //size of the RTP header:
     static int HEADER_SIZE = 12;
 
@@ -18,16 +19,13 @@ public class RTPpacket{
 
     //Bitstream of the RTP header
     public byte[] header;
-
     //size of the RTP payload
     public int payload_size;
     //Bitstream of the RTP payload
     public byte[] payload;
 
-
-
     //--------------------------
-    //Constructor of an RTPpacket object from header fields and payload bitstream
+    // Constructs an RTPpacket object from header fields and payload bitstream
     //--------------------------
     public RTPpacket(int PType, int Framenb, int Time, byte[] data, int data_length){
         //fill by default header fields:
@@ -48,7 +46,6 @@ public class RTPpacket{
         header = new byte[HEADER_SIZE];
 
         //fill the header array of byte with RTP header fields
-
         header[0] = (byte)(Version << 6 | Padding << 5 | Extension << 4 | CC);
         header[1] = (byte)(Marker << 7 | PayloadType & 0x000000FF);
         header[2] = (byte)(SequenceNumber >> 8);
@@ -62,7 +59,6 @@ public class RTPpacket{
         header[10] = (byte)(Ssrc >> 8);
         header[11] = (byte)(Ssrc & 0xFF);
 
-
         //fill the payload bitstream:
         //--------------------------
         payload_size = data_length;
@@ -70,11 +66,10 @@ public class RTPpacket{
 
         //fill payload array of byte from data (given in parameter of the constructor)
        payload = data;
-
     }
 
     //--------------------------
-    //Constructor of an RTPpacket object from the packet bistream
+    // Constructs of an RTPpacket object from the packet bitstream
     //--------------------------
     public RTPpacket(byte[] packet, int packet_size)
     {
@@ -108,7 +103,7 @@ public class RTPpacket{
     }
 
     //--------------------------
-    //getpayload: return the payload bistream of the RTPpacket and its size
+    //getpayload: return the payload bitstream of the RTPpacket and its size
     //--------------------------
     public int getpayload(byte[] data) {
 
@@ -150,7 +145,6 @@ public class RTPpacket{
     //--------------------------
     //gettimestamp
     //--------------------------
-
     public int gettimestamp() {
         return(TimeStamp);
     }
@@ -169,13 +163,10 @@ public class RTPpacket{
         return(PayloadType);
     }
 
-
     //--------------------------
     //print headers without the SSRC
     //--------------------------
     public void printheader() {
-        //TO DO: uncomment
-
         for (int i = 0; i < (HEADER_SIZE - 4); i++) {
             for (int j = 7; j >= 0; j--)
                 if (((1 << j) & header[i]) != 0)
@@ -184,17 +175,18 @@ public class RTPpacket{
                     System.out.print("0");
             System.out.print(" ");
         }
-
         System.out.println();
-
     }
 
-    //return the unsigned value of 8-bit integer nb
+    /**
+     * Get the unsigned value of 8-bit integer nb
+     * @param nb
+     * @return the unsigned value of 8-bit integer nb
+     */
     static int unsigned_int(int nb) {
         if (nb >= 0)
             return(nb);
         else
             return(256+nb);
     }
-
 }
