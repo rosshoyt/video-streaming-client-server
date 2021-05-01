@@ -1,8 +1,7 @@
-/* ------------------
-   Client
-   usage: java Client [Server hostname] [Server RTSP listening port] [Video file requested]
-   ---------------------- */
-
+/**
+ * Class which represents a streaming video client
+ * usage: java Client [Server hostname] [Server RTSP listening port] [Video file requested]
+ */
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -24,7 +23,6 @@ public class Client{
     JPanel buttonPanel = new JPanel();
     JLabel iconLabel = new JLabel();
     ImageIcon icon;
-
 
     //RTP variables:
     //----------------
@@ -56,14 +54,11 @@ public class Client{
     //------------------
     static int MJPEG_TYPE = 26; //RTP payload type for MJPEG video
 
-    //--------------------------
-    //Constructor
-    //--------------------------
+    /**
+     * Constructs the video streaming client
+     */
     public Client() {
-
         //build GUI
-        //--------------------------
-
         //Frame
         f.addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
@@ -106,9 +101,12 @@ public class Client{
         buf = new byte[15000];
     }
 
-    //------------------------------------
-    //main
-    //------------------------------------
+    /**
+     * Method which runs the Client program
+     * @param argv Host IP, Host Port, Requested video file.
+     * Example: 127.0.0.1 1025 movie.Mjpeg
+     * @throws Exception
+     */
     public static void main(String argv[]) throws Exception
     {
         //Create a Client object
@@ -140,28 +138,20 @@ public class Client{
     //Handler for buttons
     //------------------------------------
 
-    //.............
-    //TO COMPLETE
-    //.............
-
+    //------------------------------------
     //Handler for Setup button
     //-----------------------
     class setupButtonListener implements ActionListener{
         public void actionPerformed(ActionEvent e){
-
             System.out.println("Setup Button pressed !");
-
             if (state == INIT)
             {
                 //Init non-blocking RTPsocket that will be used to receive data
                 try{
                     //construct a new DatagramSocket to receive RTP packets from the server, on port RTP_RCV_PORT
                     RTPsocket = new DatagramSocket(RTP_RCV_PORT);
-
-
                     //set TimeOut value of the socket to 5msec.
                     RTPsocket.setSoTimeout(5);
-
                 }
                 catch (SocketException se)
                 {
@@ -184,25 +174,23 @@ public class Client{
                     state = READY;
                     System.out.println("New RTSP state: READY");
                 }
-            }//else if state != INIT then do nothing
+            }
+            //else if state != INIT then do nothing
         }
     }
 
+    //-----------------------
     //Handler for Play button
     //-----------------------
     class playButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e){
-
             System.out.println("Play Button pressed!");
-
             if (state == READY)
             {
                 //increase RTSP sequence number
                 ++RTSPSeqNb;
-
                 //Send PLAY message to the server
                 send_RTSP_request("PLAY");
-
                 //Wait for the response
                 if (parse_server_response() != 200)
                     System.out.println("Invalid Server Response");
@@ -211,7 +199,6 @@ public class Client{
                     //change RTSP state and print out new state
                     state = PLAYING;
                     System.out.println("New RTSP state: PLAYING");
-
                     //start the timer
                     timer.start();
                 }
@@ -291,17 +278,13 @@ public class Client{
 
     class timerListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
-
             //Construct a DatagramPacket to receive data from the UDP socket
             rcvdp = new DatagramPacket(buf, buf.length);
-
             try{
                 //receive the DP from the socket:
                 RTPsocket.receive(rcvdp);
-
                 //create an RTPpacket object from the DP
                 RTPpacket rtp_packet = new RTPpacket(rcvdp.getData(), rcvdp.getLength());
-
                 //print important header fields of the RTP packet received:
                 System.out.println("Got RTP packet with SeqNum # "+rtp_packet.getsequencenumber()+" TimeStamp "+rtp_packet.gettimestamp()+" ms, of type "+rtp_packet.getpayloadtype());
 
@@ -336,7 +319,6 @@ public class Client{
     private int parse_server_response()
     {
         int reply_code = 0;
-
         try{
             //parse status line and extract the reply_code:
             String StatusLine = RTSPBufferedReader.readLine();
@@ -375,7 +357,6 @@ public class Client{
     //------------------------------------
     //Send RTSP Request
     //------------------------------------
-
     private void send_RTSP_request(String request_type)
     {
         try{
@@ -404,5 +385,4 @@ public class Client{
             System.exit(0);
         }
     }
-
-}//end of Class Client
+}
