@@ -2,4 +2,4 @@
 /workspace.xml
 /tasks.xml
 # probably the xml files in the dictionary directory
-../out/**
+out/**
