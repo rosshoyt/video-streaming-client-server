@@ -36,4 +36,17 @@ public class VideoStream {
 
         return(fis.read(frame,0,length));
     }
+
+    /**
+     * Gets the intended fps rate of the video file or source material
+     * @return double video frames per second rate
+     */
+    public double getsourcevideofps(){
+        return  this.frames_per_second;
+    }
+    private double frames_per_second = 24; // the FPS of the source video file (default = 24)
+
+
+
+
 }
