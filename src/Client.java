@@ -244,11 +244,10 @@ public class Client{
     class tearButtonListener implements ActionListener {
         public void actionPerformed(ActionEvent e){
 
-            //System.out.println("Teardown Button pressed !");
+            System.out.println("Teardown Button pressed !");
 
             //increase RTSP sequence number
-            // ..........
-
+            ++RTSPSeqNb;
 
             //Send TEARDOWN message to the server
             send_RTSP_request("TEARDOWN");
@@ -259,8 +258,8 @@ public class Client{
             else
             {
                 //change RTSP state and print out new state
-                //........
-                //System.out.println("New RTSP state: ...");
+                state = INIT;
+                System.out.println("New RTSP state: INIT");
 
                 //stop the timer
                 timer.stop();
