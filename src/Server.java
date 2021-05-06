@@ -138,13 +138,11 @@ public class Server extends JFrame implements ActionListener {
                     System.out.println("New RTSP state: READY");
                     //Send response
                     theServer.send_RTSP_response();
-                    //init the VideoStream object:
-
                     //init RTP socket
                     theServer.RTPsocket = new DatagramSocket();
 
                 } catch (FileNotFoundException e){
-                    System.out.println("Video file " + VideoFileName + " not found on server.");
+                    theServer.send_404_response();
                     // send client 404 file not found message
                 }
             }
@@ -320,4 +318,24 @@ public class Server extends JFrame implements ActionListener {
             System.exit(0);
         }
     }
+
+    //------------------------------------
+    //Send RTSP Response with 404 code to indicate the video file was not found
+    //------------------------------------
+    private void send_404_response() {
+        try{
+            RTSPBufferedWriter.write("RTSP/1.0 404 ERR"+CRLF);
+            RTSPBufferedWriter.write("CSeq: "+RTSPSeqNb+CRLF);
+            RTSPBufferedWriter.write("Session: "+RTSP_ID+CRLF);
+            RTSPBufferedWriter.flush();
+            System.out.println("RTSP Server - Sent 404 response to Client (video file not found).");
+        }
+        catch(Exception ex)
+        {
+            System.out.println("Exception caught: "+ex);
+            System.exit(0);
+        }
+    }
+
+
 }
