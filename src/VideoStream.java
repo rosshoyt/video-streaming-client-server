@@ -10,7 +10,7 @@ public class VideoStream {
     //-----------------------------------
     //constructor
     //-----------------------------------
-    public VideoStream(String filename) throws Exception{
+    public VideoStream(String filename) throws FileNotFoundException{
 
         //init variables
         fis = new FileInputStream(filename);
