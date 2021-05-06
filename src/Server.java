@@ -127,16 +127,26 @@ public class Server extends JFrame implements ActionListener {
             request_type = theServer.parse_RTSP_request(); //blocking
             if (request_type == SETUP)
             {
-                done = true;
-                //update RTSP state
-                state = READY;
-                System.out.println("New RTSP state: READY");
-                //Send response
-                theServer.send_RTSP_response();
-                //init the VideoStream object:
-                theServer.video = new VideoStream(VideoFileName);
-                //init RTP socket
-                theServer.RTPsocket = new DatagramSocket();
+                try{
+                    // Check the video file exists (can throw a FileNotFoundException)
+                    theServer.video = new VideoStream(VideoFileName);
+
+                    // File was found, so we'll change server to the READY state
+                    done = true;
+                    //update RTSP state
+                    state = READY;
+                    System.out.println("New RTSP state: READY");
+                    //Send response
+                    theServer.send_RTSP_response();
+                    //init the VideoStream object:
+
+                    //init RTP socket
+                    theServer.RTPsocket = new DatagramSocket();
+
+                } catch (FileNotFoundException e){
+                    System.out.println("Video file " + VideoFileName + " not found on server.");
+                    // send client 404 file not found message
+                }
             }
         }
 
