@@ -343,6 +343,21 @@ public class Client{
                 RTSPid = Integer.parseInt(tokens.nextToken());
                 System.out.println("(Debug) RTSPid value = " + RTSPid);
             }
+            else if(reply_code == 404)
+            {
+                System.out.println("Server returned error 404 - file was not found");
+                String SeqNumLine = RTSPBufferedReader.readLine();
+                System.out.println(SeqNumLine);
+
+                String SessionLine = RTSPBufferedReader.readLine();
+                System.out.println(SessionLine);
+
+                //if state == INIT gets the Session Id from the SessionLine
+                tokens = new StringTokenizer(SessionLine);
+                tokens.nextToken(); //skip over the Session:
+                RTSPid = Integer.parseInt(tokens.nextToken());
+                System.out.println("(Debug) RTSPid value = " + RTSPid);
+            }
         }
         catch(Exception ex)
         {
@@ -380,7 +395,7 @@ public class Client{
         }
         catch(Exception ex)
         {
-            System.out.println("Exception caught: "+ex);
+            System.out.println("Exception caught: "+ex + "\nExiting");
             System.exit(0);
         }
     }
