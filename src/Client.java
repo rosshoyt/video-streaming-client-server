@@ -50,6 +50,9 @@ public class Client{
 
     final static String CRLF = "\r\n";
 
+    //Authentication variables
+    String Username, Password;
+
     //Video constants:
     //------------------
     static int MJPEG_TYPE = 26; //RTP payload type for MJPEG video
@@ -120,6 +123,10 @@ public class Client{
 
         //get video filename to request:
         VideoFileName = argv[2];
+
+        //get username and password to setup the stream:
+        theClient.Username = argv[3];
+        theClient.Password = argv[4];
 
         //Establish a TCP connection with the server to exchange RTSP messages
         //------------------
