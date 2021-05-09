@@ -245,31 +245,34 @@ public class Client{
         public void actionPerformed(ActionEvent e){
 
             System.out.println("Teardown Button pressed !");
+            teardown();
 
-            //increase RTSP sequence number
-            ++RTSPSeqNb;
-
-            //Send TEARDOWN message to the server
-            send_RTSP_request("TEARDOWN");
-
-            //Wait for the response
-            if (parse_server_response() != 200)
-                System.out.println("Invalid Server Response");
-            else
-            {
-                //change RTSP state and print out new state
-                state = INIT;
-                System.out.println("New RTSP state: INIT");
-
-                //stop the timer
-                timer.stop();
-
-                //exit
-                System.exit(0);
-            }
         }
     }
 
+    private void teardown(){
+        //increase RTSP sequence number
+        ++RTSPSeqNb;
+
+        //Send TEARDOWN message to the server
+        send_RTSP_request("TEARDOWN");
+
+        //Wait for the response
+        if (parse_server_response() != 200)
+            System.out.println("Invalid Server Response");
+        else
+        {
+            //change RTSP state and print out new state
+            state = INIT;
+            System.out.println("New RTSP state: INIT");
+
+            //stop the timer
+            timer.stop();
+
+            //exit
+            System.exit(0);
+        }
+    }
 
     //------------------------------------
     //Handler for timer
@@ -346,17 +349,19 @@ public class Client{
             else if(reply_code == 404)
             {
                 System.out.println("Server returned error 404 - file was not found");
-                String SeqNumLine = RTSPBufferedReader.readLine();
-                System.out.println(SeqNumLine);
-
-                String SessionLine = RTSPBufferedReader.readLine();
-                System.out.println(SessionLine);
-
-                //if state == INIT gets the Session Id from the SessionLine
-                tokens = new StringTokenizer(SessionLine);
-                tokens.nextToken(); //skip over the Session:
-                RTSPid = Integer.parseInt(tokens.nextToken());
-                System.out.println("(Debug) RTSPid value = " + RTSPid);
+                System.out.println("Starting teardown and exiting the client program...");
+                teardown();
+//                String SeqNumLine = RTSPBufferedReader.readLine();
+//                System.out.println(SeqNumLine);
+//
+//                String SessionLine = RTSPBufferedReader.readLine();
+//                System.out.println(SessionLine);
+//
+//                //if state == INIT gets the Session Id from the SessionLine
+//                tokens = new StringTokenizer(SessionLine);
+//                tokens.nextToken(); //skip over the Session:
+//                RTSPid = Integer.parseInt(tokens.nextToken());
+//                System.out.println("(Debug) RTSPid value = " + RTSPid);
             }
         }
         catch(Exception ex)
