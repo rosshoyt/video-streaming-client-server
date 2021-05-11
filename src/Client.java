@@ -57,6 +57,11 @@ public class Client{
     //------------------
     static int MJPEG_TYPE = 26; //RTP payload type for MJPEG video
 
+    // Socket info
+    //----
+    InetAddress ServerIPAddr;
+    String ServerHost;
+
     /**
      * Constructs the video streaming client
      */
@@ -118,8 +123,8 @@ public class Client{
         //get server RTSP port and IP address from the command line
         //------------------
         int RTSP_server_port = Integer.parseInt(argv[1]);
-        String ServerHost = argv[0];
-        InetAddress ServerIPAddr = InetAddress.getByName(ServerHost);
+        theClient.ServerHost = argv[0];
+        theClient.ServerIPAddr = InetAddress.getByName(theClient.ServerHost);
 
         //get video filename to request:
         VideoFileName = argv[2];
@@ -130,7 +135,7 @@ public class Client{
 
         //Establish a TCP connection with the server to exchange RTSP messages
         //------------------
-        theClient.RTSPsocket = new Socket(ServerIPAddr, RTSP_server_port);
+        theClient.RTSPsocket = new Socket(theClient.ServerIPAddr, RTSP_server_port);
 
         //Set input and output stream filters:
         RTSPBufferedReader = new BufferedReader(new InputStreamReader(theClient.RTSPsocket.getInputStream()) );
