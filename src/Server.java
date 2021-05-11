@@ -264,10 +264,11 @@ public class Server extends JFrame implements ActionListener {
             else if ((new String(request_type_string)).compareTo("TEARDOWN") == 0)
                 request_type = TEARDOWN;
 
+
             if (request_type == SETUP)
             {
-                //extract VideoFileName from RequestLine
-                VideoFileName = tokens.nextToken();
+                // parse the RTSP url from RequestLine
+                parse_RTSP_URL(tokens.nextToken());
             }
 
             //parse the SeqNumLine and extract CSeq field
@@ -298,6 +299,18 @@ public class Server extends JFrame implements ActionListener {
             System.exit(0);
         }
         return(request_type);
+    }
+
+    //------------------------------------
+    //Parse RTSP URl and sets Server data fields
+    //TODO extract username, password for authentication
+    //TODO make parsing more robust for malformed URL etc
+    //TODO could use regex
+    //------------------------------------
+    private void parse_RTSP_URL(String rtspURL){
+        System.out.println("Parsing RTSP url: " + rtspURL);
+        VideoFileName = rtspURL.substring(rtspURL.lastIndexOf("/") + 1);
+        System.out.println("Video File Name = " + VideoFileName);
     }
 
     //------------------------------------

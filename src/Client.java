@@ -394,7 +394,8 @@ public class Client{
             //Use the RTSPBufferedWriter to write to the RTSP socket
 
             //write the request line:
-            RTSPBufferedWriter.write(request_type + " " + VideoFileName + " RTSP/1.0" + CRLF);
+            RTSPBufferedWriter.write(request_type + " " + "rtsp://" +
+                    Username + ":" + Password + "@" +  ServerIPAddr + "/" + VideoFileName + " RTSP/1.0" + CRLF);
 
             //write the CSeq line:
             RTSPBufferedWriter.write("CSeq: " + RTSPSeqNb + CRLF);
