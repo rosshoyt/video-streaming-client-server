@@ -136,7 +136,7 @@ public class Server extends JFrame implements ActionListener {
             boolean authenticated = theServer.authenticate();
             if(!authenticated){
                 System.out.println("Authentication failed");
-                // TODO return 401 Unauthorized Response
+                theServer.send_401_response();
             }
             else if (request_type == SETUP)
             {
@@ -376,6 +376,21 @@ public class Server extends JFrame implements ActionListener {
         }
     }
 
+    /**
+     * Sends a 401 not authorized response to client
+     */
+    private void send_401_response() {
+        try{
+            RTSPBufferedWriter.write(RTSPutils.get_RTSP_response(401, RTSPSeqNb, RTSP_ID));
+            RTSPBufferedWriter.flush();
+            System.out.println("Sent 401 Not Authorized Response to client");
+        }catch (IOException e){
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
+
+
     //------------------------------------
     //Verifies the username and password combo
     //returns true if authentication successful
@@ -384,4 +399,7 @@ public class Server extends JFrame implements ActionListener {
     private boolean authenticate() {
         return ClientUsername.equals("johndoe") && ClientPassword.equals("asdf1234");
     }
+
+
+
 }
