@@ -58,6 +58,13 @@ public class Server extends JFrame implements ActionListener {
 
     final static String CRLF = "\r\n";
 
+    // Authentication variables
+    //----------------
+    // Username provided in last RTSP request
+    String ClientUsername;
+    // Password provided in last RTSP request
+    String ClientPassword;
+    
     /**
      * Constructs the video streaming server
      */
@@ -265,6 +272,7 @@ public class Server extends JFrame implements ActionListener {
                 request_type = TEARDOWN;
 
 
+
             if (request_type == SETUP)
             {
                 // parse the RTSP url from RequestLine
@@ -303,14 +311,26 @@ public class Server extends JFrame implements ActionListener {
 
     //------------------------------------
     //Parse RTSP URl and sets Server data fields
-    //TODO extract username, password for authentication
-    //TODO make parsing more robust for malformed URL etc
-    //TODO could use regex
+    //TODO handle malformed or differently formatted RTSP urls
+    //TODO delete debug msgs
     //------------------------------------
     private void parse_RTSP_URL(String rtspURL){
-        System.out.println("Parsing RTSP url: " + rtspURL);
+        // check if URL starts correctly
+        String rtspProtocolIDString = "rtsp://";
+        if(rtspURL.indexOf(rtspProtocolIDString) == -1){
+            throw new IllegalArgumentException("URL must start with " + rtspProtocolIDString);
+        }
+
+        // extract the username and password
+        // TODO could use regex
+        // TODO could add encryption/decryption
+        int firstColonIndex = rtspURL.indexOf(":", rtspProtocolIDString.length());
+        ClientUsername = rtspURL.substring(rtspProtocolIDString.length(),firstColonIndex);
+        int atSignIndex = rtspURL.indexOf("@");
+        ClientPassword = rtspURL.substring(firstColonIndex+1,atSignIndex);
+
+        // extract the video file name TODO handle different filename types and directories
         VideoFileName = rtspURL.substring(rtspURL.lastIndexOf("/") + 1);
-        System.out.println("Video File Name = " + VideoFileName);
     }
 
     //------------------------------------
@@ -349,6 +369,5 @@ public class Server extends JFrame implements ActionListener {
             System.exit(0);
         }
     }
-
 
 }
