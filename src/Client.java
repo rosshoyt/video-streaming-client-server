@@ -358,22 +358,17 @@ public class Client{
                 RTSPid = Integer.parseInt(tokens.nextToken());
                 System.out.println("(Debug) RTSPid value = " + RTSPid);
             }
+            else if(reply_code == 401)
+            {
+                System.out.println("Server returned error 401 - not authorized");
+                System.out.println("Starting teardown and exiting the client program...");
+                teardown();
+            }
             else if(reply_code == 404)
             {
                 System.out.println("Server returned error 404 - file was not found");
                 System.out.println("Starting teardown and exiting the client program...");
                 teardown();
-//                String SeqNumLine = RTSPBufferedReader.readLine();
-//                System.out.println(SeqNumLine);
-//
-//                String SessionLine = RTSPBufferedReader.readLine();
-//                System.out.println(SessionLine);
-//
-//                //if state == INIT gets the Session Id from the SessionLine
-//                tokens = new StringTokenizer(SessionLine);
-//                tokens.nextToken(); //skip over the Session:
-//                RTSPid = Integer.parseInt(tokens.nextToken());
-//                System.out.println("(Debug) RTSPid value = " + RTSPid);
             }
         }
         catch(Exception ex)
