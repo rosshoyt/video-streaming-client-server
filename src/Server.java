@@ -382,6 +382,6 @@ public class Server extends JFrame implements ActionListener {
     //TODO extend to support different username/pw combos defined externally, add encryption/decryption
     //------------------------------------
     private boolean authenticate() {
-        return ClientUsername == "johndoe" && ClientPassword == "asdf1234";
+        return ClientUsername.equals("johndoe") && ClientPassword.equals("asdf1234");
     }
 }
