@@ -64,7 +64,7 @@ public class Server extends JFrame implements ActionListener {
     String ClientUsername;
     // Password provided in last RTSP request
     String ClientPassword;
-    
+
     /**
      * Constructs the video streaming server
      */
@@ -132,7 +132,13 @@ public class Server extends JFrame implements ActionListener {
         while(!done)
         {
             request_type = theServer.parse_RTSP_request(); //blocking
-            if (request_type == SETUP)
+
+            boolean authenticated = theServer.authenticate();
+            if(!authenticated){
+                System.out.println("Authentication failed");
+                // TODO return 401 Unauthorized Response
+            }
+            else if (request_type == SETUP)
             {
                 try{
                     // Check the video file exists (can throw a FileNotFoundException)
@@ -370,4 +376,12 @@ public class Server extends JFrame implements ActionListener {
         }
     }
 
+    //------------------------------------
+    //Verifies the username and password combo
+    //returns true if authentication successful
+    //TODO extend to support different username/pw combos defined externally, add encryption/decryption
+    //------------------------------------
+    private boolean authenticate() {
+        return ClientUsername == "johndoe" && ClientPassword == "asdf1234";
+    }
 }
