@@ -99,8 +99,7 @@ public class Server extends JFrame implements ActionListener {
      * example: 1025
      * @throws Exception
      */
-    public static void main(String argv[]) throws Exception
-    {
+    public static void main(String argv[]) throws Exception {
         //create a Server object
         Server theServer = new Server();
 
@@ -123,8 +122,8 @@ public class Server extends JFrame implements ActionListener {
         state = INIT;
 
         //Set input and output stream filters:
-        RTSPBufferedReader = new BufferedReader(new InputStreamReader(theServer.RTSPsocket.getInputStream()) );
-        RTSPBufferedWriter = new BufferedWriter(new OutputStreamWriter(theServer.RTSPsocket.getOutputStream()) );
+        RTSPBufferedReader = new BufferedReader(new InputStreamReader(theServer.RTSPsocket.getInputStream()));
+        RTSPBufferedWriter = new BufferedWriter(new OutputStreamWriter(theServer.RTSPsocket.getOutputStream()));
 
         //Wait for the SETUP message from the client
         int request_type;
@@ -155,14 +154,13 @@ public class Server extends JFrame implements ActionListener {
             }
         }
 
+
         //loop to handle RTSP requests
-        while(true)
-        {
+        while (true) {
             //parse the request
             request_type = theServer.parse_RTSP_request(); //blocking
 
-            if ((request_type == PLAY) && (state == READY))
-            {
+            if ((request_type == PLAY) && (state == READY)) {
                 //send back response
                 theServer.send_RTSP_response();
                 //start timer
@@ -170,9 +168,7 @@ public class Server extends JFrame implements ActionListener {
                 //update state
                 state = PLAYING;
                 System.out.println("New RTSP state: PLAYING");
-            }
-            else if ((request_type == PAUSE) && (state == PLAYING))
-            {
+            } else if ((request_type == PAUSE) && (state == PLAYING)) {
                 //send back response
                 theServer.send_RTSP_response();
                 //stop timer
@@ -180,9 +176,7 @@ public class Server extends JFrame implements ActionListener {
                 //update state
                 state = READY;
                 System.out.println("New RTSP state: READY");
-            }
-            else if (request_type == TEARDOWN)
-            {
+            } else if (request_type == TEARDOWN) {
                 //send back response
                 theServer.send_RTSP_response();
                 //stop timer
