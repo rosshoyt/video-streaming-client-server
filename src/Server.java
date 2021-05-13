@@ -46,6 +46,9 @@ public class Server extends JFrame implements ActionListener {
     final static int PLAY = 4;
     final static int PAUSE = 5;
     final static int TEARDOWN = 6;
+    // flag that signifies the message type is not supported by the server
+    final static int UNIMPLEMENTED_MESSAGE_TYPE = -1;
+
 
     static int state; //RTSP Server state == INIT or READY or PLAY
     Socket RTSPsocket; //socket used to send/receive RTSP messages
@@ -152,8 +155,10 @@ public class Server extends JFrame implements ActionListener {
             } catch (FileNotFoundException e) {
                 theServer.send_404_response();
             }
+        } else if(request_type == UNIMPLEMENTED_MESSAGE_TYPE){
+            System.out.println("Client Response Code " + request_type + " not Implemented  - sending Response Code 501");
+            theServer.send_501_response();
         }
-
 
         //loop to handle RTSP requests
         while (true) {
@@ -242,10 +247,11 @@ public class Server extends JFrame implements ActionListener {
 
     //------------------------------------
     //Parse RTSP Request
+    //returns -1 if the request type is not implemented
     //------------------------------------
     private int parse_RTSP_request()
     {
-        int request_type = -1;
+        int request_type = UNIMPLEMENTED_MESSAGE_TYPE;
         try{
             //parse request line and extract the request_type:
             String RequestLine = RTSPBufferedReader.readLine();
@@ -264,8 +270,6 @@ public class Server extends JFrame implements ActionListener {
                 request_type = PAUSE;
             else if ((new String(request_type_string)).compareTo("TEARDOWN") == 0)
                 request_type = TEARDOWN;
-
-
 
             if (request_type == SETUP)
             {
@@ -378,6 +382,19 @@ public class Server extends JFrame implements ActionListener {
         }
     }
 
+    //------------------------------------
+    //Send RTSP Response with 501 code to indicate the server hasn't implemented the request
+    //------------------------------------
+    private void send_501_response() {
+        try{
+            RTSPBufferedWriter.write(RTSPutils.get_RTSP_response(501, RTSPSeqNb, RTSP_ID));
+            RTSPBufferedWriter.flush();
+            System.out.println("Sent 501 Not Implemented Response to client");
+        }catch (IOException e){
+            e.printStackTrace();
+            System.exit(-1);
+        }
+    }
 
     //------------------------------------
     //Verifies the username and password combo

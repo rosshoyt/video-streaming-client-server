@@ -8,7 +8,7 @@ public class RTSPutils {
      * @param statusCode int RTSP status code (404 = file not found, 401 = unauthorized, etc)
      * @param rtspSeqNum int sequence number
      * @param rtspID int id
-     * @return String RTSP response with the requested params
+     * @return String RTSP response with  the requested params
      */
     public static String get_RTSP_response(int statusCode, int rtspSeqNum, int rtspID){
         StringBuffer sb = new StringBuffer();
@@ -18,6 +18,8 @@ public class RTSPutils {
             case 401:
                 sb.append(statusCode + " ERR" + CRLF);
                 break;
+            case 501: // Client request code NOT IMPLEMENTED
+                sb.append(statusCode + " ERR" + CRLF);
         }
         // set sequence number and session id lines
         sb.append("CSeq: "+rtspSeqNum+CRLF);
