@@ -263,6 +263,7 @@ public class Client{
     }
 
     private void teardown(){
+        System.out.println("Starting teardown and exiting the client program...");
         //increase RTSP sequence number
         ++RTSPSeqNb;
 
@@ -361,13 +362,11 @@ public class Client{
             else if(reply_code == 401)
             {
                 System.out.println("Server returned error 401 - not authorized");
-                System.out.println("Starting teardown and exiting the client program...");
                 teardown();
             }
             else if(reply_code == 404)
             {
                 System.out.println("Server returned error 404 - file was not found");
-                System.out.println("Starting teardown and exiting the client program...");
                 teardown();
             }
         }
