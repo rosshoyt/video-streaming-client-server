@@ -128,36 +128,30 @@ public class Server extends JFrame implements ActionListener {
 
         //Wait for the SETUP message from the client
         int request_type;
-        boolean done = false;
-        while(!done)
-        {
-            request_type = theServer.parse_RTSP_request(); //blocking
 
-            boolean authenticated = theServer.authenticate();
-            if(!authenticated){
-                System.out.println("Authentication failed");
-                theServer.send_401_response();
-            }
-            else if (request_type == SETUP)
-            {
-                try{
-                    // Check the video file exists (can throw a FileNotFoundException)
-                    theServer.video = new VideoStream(VideoFileName);
+        // Wait for initial SETUP request
+        request_type = theServer.parse_RTSP_request(); //blocking
 
-                    // File was found, so we'll change server to the READY state
-                    done = true;
-                    //update RTSP state
-                    state = READY;
-                    System.out.println("New RTSP state: READY");
-                    //Send response
-                    theServer.send_RTSP_response();
-                    //init RTP socket
-                    theServer.RTPsocket = new DatagramSocket();
 
-                } catch (FileNotFoundException e){
-                    theServer.send_404_response();
-                    // send client 404 file not found message
-                }
+        boolean authenticated = theServer.authenticate();
+        if (!authenticated) {
+            System.out.println("Authentication failed");
+            theServer.send_401_response();
+        } else if (request_type == SETUP) {
+            try {
+                // Check the video file exists (can throw a FileNotFoundException)
+                theServer.video = new VideoStream(VideoFileName);
+
+                // File was found, so we'll change server to the READY state
+                state = READY;
+                System.out.println("New RTSP state: READY");
+                //Send response
+                theServer.send_RTSP_response();
+                //init RTP socket
+                theServer.RTPsocket = new DatagramSocket();
+
+            } catch (FileNotFoundException e) {
+                theServer.send_404_response();
             }
         }
 
