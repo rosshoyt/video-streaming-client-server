@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Client - bad filename test" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="Client" />
+    <module name="Project2_1" />
+    <option name="PROGRAM_PARAMETERS" value="127.0.0.1 1025 fake.file johndoe asdf1234" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
