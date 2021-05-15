@@ -198,20 +198,15 @@ public class Server extends JFrame implements ActionListener {
             } else if (request_type == TEARDOWN) {
                 //send back response
                 theServer.send_RTSP_response();
-                //stop timer
-                theServer.timer.stop();
-                //close sockets
-                theServer.RTSPsocket.close();
-                theServer.RTPsocket.close();
-                theServer.RTPsocketaudio.close();
-                System.exit(0);
+
+                theServer.exit();
+
             } else if(request_type == UNIMPLEMENTED_MESSAGE_TYPE){
                 System.out.println("Client Response Code " + request_type + " not Implemented  - sending Response Code 501");
                 theServer.send_501_response();
             }
         }
     }
-
 
     //------------------------
     //Handler for timer
@@ -431,6 +426,23 @@ public class Server extends JFrame implements ActionListener {
         return ClientUsername.equals("johndoe") && ClientPassword.equals("asdf1234");
     }
 
-
-
+    /**
+     * Method which stops server sending video, closes all socket connections, and exits the program
+     */
+    private void exit(){
+        //stop timer
+        timer.stop();
+        try{
+            // close all socket connections
+            if(RTSPsocket != null)
+                RTSPsocket.close();
+            if(RTPsocket != null)
+                RTPsocket.close();
+            if(RTPsocketaudio != null)
+                RTPsocketaudio.close();
+        } catch(IOException e){
+            e.printStackTrace();
+        }
+        System.exit(0);
+    }
 }
