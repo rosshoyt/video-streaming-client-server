@@ -13,7 +13,8 @@
 * #### (Example)  java Server 1025
 #### 2.	Start client -
 * #### Compile: javac Client.java
-* #### Run: java Client *server-host-address server-port-number video-file*
-* #### (Example) java Client 127.0.0.1 1025 movie.Mjpeg
+* #### Run: java Client *server-host-address server-port-number video-file username password*
+* #### (Example) java Client 127.0.0.1 1025 movie.Mjpeg johndoe asdf1234
+* ##### *Note: Username and password are required to be "johndoe" and "asdf1234" for authorization*
 #### 3.	Press ‘Setup’ button in Client
 #### 4.	Press ‘Play’ button in Client
