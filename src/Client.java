@@ -362,12 +362,12 @@ public class Client{
             else if(reply_code == 401)
             {
                 System.out.println("Server returned error 401 - not authorized");
-                teardown();
+                exit();
             }
             else if(reply_code == 404)
             {
                 System.out.println("Server returned error 404 - file was not found");
-                teardown();
+                exit();
             }
         }
         catch(Exception ex)
@@ -410,5 +410,24 @@ public class Client{
             System.out.println("Exception caught: "+ex + "\nExiting");
             System.exit(0);
         }
+    }
+
+    /**
+     * Method which stops client timer, closes all socket connections, and exits the program
+     */
+    private void exit(){
+        System.out.println("Exiting the client program");
+        //stop timer
+        timer.stop();
+        try{
+            // close all socket connections
+            if(RTSPsocket != null)
+                RTSPsocket.close();
+            if(RTPsocket != null)
+                RTPsocket.close();
+        } catch(IOException e){
+            e.printStackTrace();
+        }
+        System.exit(0);
     }
 }
