@@ -128,12 +128,8 @@ public class Server extends JFrame implements ActionListener {
         RTSPBufferedReader = new BufferedReader(new InputStreamReader(theServer.RTSPsocket.getInputStream()));
         RTSPBufferedWriter = new BufferedWriter(new OutputStreamWriter(theServer.RTSPsocket.getOutputStream()));
 
-        //Wait for the SETUP message from the client
-        int request_type;
-
-        // Wait for initial SETUP request
-        request_type = theServer.parse_RTSP_request(); //blocking
-
+        // Wait for initial SETUP request from client
+        int request_type = theServer.parse_RTSP_request(); //blocking
 
         boolean authenticated = theServer.authenticate();
         if (!authenticated) {
