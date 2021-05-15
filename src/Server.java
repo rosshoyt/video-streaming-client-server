@@ -66,7 +66,6 @@ public class Server extends JFrame implements ActionListener {
     // flag that signifies the message type is not supported by the server
     final static int UNIMPLEMENTED_MESSAGE_TYPE = -1;
 
-
     static int state; //RTSP Server state == INIT or READY or PLAY
     Socket RTSPsocket; //socket used to send/receive RTSP messages
     //input and output stream filters
@@ -267,6 +266,7 @@ public class Server extends JFrame implements ActionListener {
     }
     //------------------------------------
     //Parse RTSP Request
+    //exits program if request is null (Client has closed connection)
     //returns -1 if the request type is not implemented
     //------------------------------------
     private int parse_RTSP_request()
@@ -276,49 +276,52 @@ public class Server extends JFrame implements ActionListener {
             //parse request line and extract the request_type:
             String RequestLine = RTSPBufferedReader.readLine();
             System.out.println("RTSP Server - Received from Client:");
-            System.out.println(RequestLine);
 
-            StringTokenizer tokens = new StringTokenizer(RequestLine);
-            String request_type_string = tokens.nextToken();
+            if(RequestLine == null){
+                System.out.println("Null Request - The Client has closed the connection");
+                exit();
+            } else {
+                System.out.println(RequestLine);
+                StringTokenizer tokens = new StringTokenizer(RequestLine);
+                String request_type_string = tokens.nextToken();
 
-            //convert to request_type structure:
-            if ((new String(request_type_string)).compareTo("SETUP") == 0)
-                request_type = SETUP;
-            else if ((new String(request_type_string)).compareTo("PLAY") == 0)
-                request_type = PLAY;
-            else if ((new String(request_type_string)).compareTo("PAUSE") == 0)
-                request_type = PAUSE;
-            else if ((new String(request_type_string)).compareTo("TEARDOWN") == 0)
-                request_type = TEARDOWN;
+                //convert to request_type structure:
+                if ((new String(request_type_string)).compareTo("SETUP") == 0)
+                    request_type = SETUP;
+                else if ((new String(request_type_string)).compareTo("PLAY") == 0)
+                    request_type = PLAY;
+                else if ((new String(request_type_string)).compareTo("PAUSE") == 0)
+                    request_type = PAUSE;
+                else if ((new String(request_type_string)).compareTo("TEARDOWN") == 0)
+                    request_type = TEARDOWN;
 
-            if (request_type == SETUP)
-            {
-                // parse the RTSP url from RequestLine
-                parse_RTSP_URL(tokens.nextToken());
+                if (request_type == SETUP) {
+                    // parse the RTSP url from RequestLine
+                    parse_RTSP_URL(tokens.nextToken());
+                }
+
+                //parse the SeqNumLine and extract CSeq field
+                String SeqNumLine = RTSPBufferedReader.readLine();
+                System.out.println(SeqNumLine);
+                tokens = new StringTokenizer(SeqNumLine);
+                tokens.nextToken(); // skips "CSeq: " text
+                RTSPSeqNb = Integer.parseInt(tokens.nextToken());
+                System.out.println("(Debug) RTSPSeqNb = " + RTSPSeqNb);
+
+                //get LastLine
+                String LastLine = RTSPBufferedReader.readLine();
+                System.out.println(LastLine);
+
+                if (request_type == SETUP) {
+                    //extract RTP_dest_port from LastLine
+                    tokens = new StringTokenizer(LastLine);
+                    for (int i = 0; i < 3; i++)
+                        tokens.nextToken();
+                    RTP_dest_port = Integer.parseInt(tokens.nextToken());
+                    //RTP_dest_port_audio = Integer.parseInt()
+                }
+                //else LastLine will be the SessionId line ... do not check for now.
             }
-
-            //parse the SeqNumLine and extract CSeq field
-            String SeqNumLine = RTSPBufferedReader.readLine();
-            System.out.println(SeqNumLine);
-            tokens = new StringTokenizer(SeqNumLine);
-            tokens.nextToken(); // skips "CSeq: " text
-            RTSPSeqNb = Integer.parseInt(tokens.nextToken());
-            System.out.println("(Debug) RTSPSeqNb = " + RTSPSeqNb);
-
-            //get LastLine
-            String LastLine = RTSPBufferedReader.readLine();
-            System.out.println(LastLine);
-
-            if (request_type == SETUP)
-            {
-                //extract RTP_dest_port from LastLine
-                tokens = new StringTokenizer(LastLine);
-                for (int i=0; i<3; i++)
-                    tokens.nextToken();
-                RTP_dest_port = Integer.parseInt(tokens.nextToken());
-                //RTP_dest_port_audio = Integer.parseInt()
-            }
-            //else LastLine will be the SessionId line ... do not check for now.
         }
         catch(Exception ex)
         {
