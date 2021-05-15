@@ -17,8 +17,14 @@ public class Server extends JFrame implements ActionListener {
     DatagramSocket RTPsocket; //socket to be used to send and receive UDP packets
     DatagramPacket senddp; //UDP packet containing the video frames
 
+    //RTP audio variables:
+    //----------------
+    DatagramSocket RTPsocketaudio;
+    DatagramPacket senddpaudio;
+
     InetAddress ClientIPAddr; //Client IP address
     int RTP_dest_port = 0; //destination port for RTP packets  (given by the RTSP Client)
+    int RTP_dest_port_audio = 1026; // TODO let RTSP Client set port when setting up the audio stream
 
     //GUI:
     //----------------
@@ -34,6 +40,17 @@ public class Server extends JFrame implements ActionListener {
 
     Timer timer; //timer used to send the images at the video frame rate
     byte[] buf; //buffer used to store the images to send to the client
+
+    //Audio variables:
+    //----------------
+    int sanmplenb = 0; //image nb of the image currently transmitted
+    AudioStream audio; //VideoStream object used to access video frames
+    static int AUDIO_TYPE = 10; //RTP payload type for Linear PCM 16-bit Stereo audio (1411.2 kbit/s, uncompressed)
+    //static int AUDIO_CHUNK_PERIOD = 25; //Frame period of the video to stream, in ms
+    //static int AUDIO_LENGTH = 500; //length of the video in frames
+
+    //Timer timeraudio; //timer used to send the images at the video frame rate
+    byte[] bufaudio; //buffer used to store the images to send to the client
 
     //RTSP variables
     //----------------
@@ -82,6 +99,7 @@ public class Server extends JFrame implements ActionListener {
 
         //allocate memory for the sending buffer
         buf = new byte[15000];
+        bufaudio = new byte[15000];
 
         //Handler to close the main window
         addWindowListener(new WindowAdapter() {
@@ -128,12 +146,8 @@ public class Server extends JFrame implements ActionListener {
         RTSPBufferedReader = new BufferedReader(new InputStreamReader(theServer.RTSPsocket.getInputStream()));
         RTSPBufferedWriter = new BufferedWriter(new OutputStreamWriter(theServer.RTSPsocket.getOutputStream()));
 
-        //Wait for the SETUP message from the client
-        int request_type;
-
-        // Wait for initial SETUP request
-        request_type = theServer.parse_RTSP_request(); //blocking
-
+        // Wait for initial SETUP request from client
+        int request_type = theServer.parse_RTSP_request(); //blocking
 
         boolean authenticated = theServer.authenticate();
         if (!authenticated) {
@@ -144,13 +158,17 @@ public class Server extends JFrame implements ActionListener {
                 // Check the video file exists (can throw a FileNotFoundException)
                 theServer.video = new VideoStream(VideoFileName);
 
+
+
                 // File was found, so we'll change server to the READY state
                 state = READY;
                 System.out.println("New RTSP state: READY");
                 //Send response
                 theServer.send_RTSP_response();
-                //init RTP socket
+                //init RTP video socket
                 theServer.RTPsocket = new DatagramSocket();
+                //init RTP audio socket
+                theServer.RTPsocketaudio = new DatagramSocket();
 
             } catch (FileNotFoundException e) {
                 theServer.send_404_response();
@@ -159,6 +177,10 @@ public class Server extends JFrame implements ActionListener {
             System.out.println("Client Response Code " + request_type + " not Implemented  - sending Response Code 501");
             theServer.send_501_response();
         }
+
+        theServer.audio = new AudioStream("AudioStreamTest1_16bit_44100_Mono.wav");
+
+
 
         //loop to handle RTSP requests
         while (true) {
@@ -189,6 +211,7 @@ public class Server extends JFrame implements ActionListener {
                 //close sockets
                 theServer.RTSPsocket.close();
                 theServer.RTPsocket.close();
+                theServer.RTPsocketaudio.close();
 
                 System.exit(0);
             }
@@ -229,6 +252,15 @@ public class Server extends JFrame implements ActionListener {
                 //print the header bitstream
                 rtp_packet.printheader();
 
+
+                //
+//                try {
+//                    audio.getnextchunk(bufaudio);
+//                    AudioUtilities.playBuffer(bufaudio);
+//                }catch(Exception asdf){
+//                    asdf.printStackTrace();
+//                }
+
                 //update GUI
                 label.setText("Send frame #" + imagenb);
             }
@@ -244,7 +276,6 @@ public class Server extends JFrame implements ActionListener {
             timer.stop();
         }
     }
-
     //------------------------------------
     //Parse RTSP Request
     //returns -1 if the request type is not implemented
@@ -296,6 +327,7 @@ public class Server extends JFrame implements ActionListener {
                 for (int i=0; i<3; i++)
                     tokens.nextToken();
                 RTP_dest_port = Integer.parseInt(tokens.nextToken());
+                //RTP_dest_port_audio = Integer.parseInt()
             }
             //else LastLine will be the SessionId line ... do not check for now.
         }
