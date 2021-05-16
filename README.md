@@ -18,3 +18,17 @@
 #### 4.	Press ‘Play’ button in Client
 #### 5. (Optional) Press 'Pause' button in Client
 #### 6. Press 'Teardown' button in Client
+#
+### Extra Credit
+#### 1. Readability:
+* #### Simplified Server.main() method control flow
+* #### To reduce code duplication, added static method to generate Server RTSP responses in RTSPutils.java 
+#### 2. Error checking:
+* #### Server responds with 404 File Not Found Error Code when requested media file is not found on server
+* #### Server responds with 401 Not Authorized Error Code when provided username or password is incorrect
+* #### Server responds with 501 Not Implemented Error Code when Client sends a RTSP request that isn't supported ("OPTIONS", "DESCRIBE", "RECORD", etc)
+#### 3. Resource management:
+* #### When a Client closes after error occurs on SETUP (404, 401), the Server closes Sockets and exits
+#### 4. Comments: 
+* #### Added Javadoc comments for all added classes, fields, and methods
+* #### Added in-line comments to clarify intended purpose of individual lines of code
