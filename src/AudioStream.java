@@ -1,9 +1,7 @@
-import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -19,7 +17,7 @@ public class AudioStream {
 
     double timerRateMS = -1; // time length (MS) that the user will be requesting audio frames at
 
-    //AudioFileFormat audioFileFormat = new AudioFileFormat(AudioFileFormat.Type.WAVE,);
+    int byteLength = 1000;
     /**
      * Creates an audio stream of a specified folder
      * @param filename
@@ -36,24 +34,26 @@ public class AudioStream {
         }catch (Exception e){
             e.printStackTrace();
         }
+        calculatePacketBitLength();
+    }
 
-
+    /**
+     * TODO use sample rate of audio file to calculate exact number of bytes needed to fill the packet time length
+     */
+    void calculatePacketBitLength(){
+        // byteLength = ...
     }
 
     /**
      * Reads the next frame of audio data from the audio stream into a byte array
      * @param frame the byte array to fill with audio data
-     * @return
+     * @return size of data in frame
      * @throws IOException
      */
     public int getnextframe(byte[] frame) throws IOException {
-
-        int length = 0;
-        // TODO set length
-        //ais.read(chunk_length, 0, 5);
-
-        return (ais.read(frame,0, length));
+        return (ais.read(frame,0, byteLength));
     }
+
 
     public boolean isValid() {
         return isValid;
