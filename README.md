@@ -32,3 +32,12 @@
 #### 4. Comments: 
 * #### Added Javadoc comments for all added classes, fields, and methods
 * #### Added in-line comments to clarify intended purpose of individual lines of code
+#### 5. Pros/Cons of System:
+| Topic | Pros      | Cons |
+| ----- |---------- | ---- |
+| Security: | Server authenticates username and password in RTSP requests |  No Denial-of-service protection |
+| Congestion Control: |      | RTP socket uses UDP - no congestion control for streaming media  |
+| Multithreading:     |      | No additional multithreading implemented   |
+| Scalability: |      | Server can only accept 1 client at a time |
+|              |      | Server must restart if client disconnects, can't accept new clients |
+|              |      | IP multicast not implemented |
