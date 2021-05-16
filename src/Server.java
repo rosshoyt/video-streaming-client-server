@@ -361,9 +361,7 @@ public class Server extends JFrame implements ActionListener {
     private void send_RTSP_response()
     {
         try{
-            RTSPBufferedWriter.write("RTSP/1.0 200 OK"+CRLF);
-            RTSPBufferedWriter.write("CSeq: "+RTSPSeqNb+CRLF);
-            RTSPBufferedWriter.write("Session: "+RTSP_ID+CRLF);
+            RTSPBufferedWriter.write(RTSPutils.get_RTSP_response(200, RTSPSeqNb, RTSP_ID));
             RTSPBufferedWriter.flush();
             //System.out.println("RTSP Server - Sent response to Client.");
         }
@@ -379,9 +377,7 @@ public class Server extends JFrame implements ActionListener {
     //------------------------------------
     private void send_404_response() {
         try{
-            RTSPBufferedWriter.write("RTSP/1.0 404 ERR"+CRLF);
-            RTSPBufferedWriter.write("CSeq: "+RTSPSeqNb+CRLF);
-            RTSPBufferedWriter.write("Session: "+RTSP_ID+CRLF);
+            RTSPBufferedWriter.write(RTSPutils.get_RTSP_response(401, RTSPSeqNb, RTSP_ID));
             RTSPBufferedWriter.flush();
             System.out.println("RTSP Server - Sent 404 response to Client (video file not found).");
         }
