@@ -10,15 +10,19 @@ import java.io.FileInputStream;
  */
 public class AudioTests {
     private int bytes;          // total number of bytes
+
+
+    public static final  AudioFormat DEF_AUDIO_FORMAT = new AudioFormat(44100, 16, 1, true, false);
+
     public static void playBuffer(byte[] buf){
-        System.out.println("Playing Audio buffer of size");
+        System.out.println("Playing Audio buffer " + buf.length);
         SourceDataLine line = null;
-        AudioFormat format = new AudioFormat(44100, 8, 1, true, false);
-        DataLine.Info info  = new DataLine.Info(SourceDataLine.class, format);
+
+        DataLine.Info info  = new DataLine.Info(SourceDataLine.class, DEF_AUDIO_FORMAT);
 
         try {
             line = (SourceDataLine) AudioSystem.getLine(info);
-            line.open(format);
+            line.open(DEF_AUDIO_FORMAT);
         }
         catch (Exception e) {
             e.printStackTrace();
