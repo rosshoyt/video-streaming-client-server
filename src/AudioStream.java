@@ -1,3 +1,4 @@
+import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
@@ -17,7 +18,11 @@ public class AudioStream {
 
     double timerRateMS = -1; // time length (MS) that the user will be requesting audio frames at
 
-    int byteLength = 1000;
+    /**
+     * The byte length of a frame of audio. Used to fill the buffer from the audio stream
+     */
+    int frameByteLength = -1;
+
     /**
      * Creates an audio stream of a specified folder
      * @param filename
@@ -34,14 +39,24 @@ public class AudioStream {
         }catch (Exception e){
             e.printStackTrace();
         }
-        calculatePacketBitLength();
+        calculatePacketByteLength();
     }
 
     /**
-     * TODO use sample rate of audio file to calculate exact number of bytes needed to fill the packet time length
+     * TODO use values in audiostream.audioformat instead of hardcoded values
      */
-    void calculatePacketBitLength(){
+    void calculatePacketByteLength(){
         // byteLength = ...
+        int frameLengthMS = 100;
+        int sampleRate = 44100;
+        int bitDepthRate = 16;
+        //ais.getFormat().
+        int sampleRateMS = sampleRate / 1000;
+        // calculate the number of samples per millisecond
+        int frameSampleLengthMS = sampleRateMS * frameLengthMS;
+        this.frameByteLength = frameSampleLengthMS * bitDepthRate / 8;
+        System.out.println("Audio Stream frameByteLength = " + frameByteLength);
+        System.out.println(ais.getFormat());
     }
 
     /**
@@ -51,7 +66,7 @@ public class AudioStream {
      * @throws IOException
      */
     public int getnextframe(byte[] frame) throws IOException {
-        return (ais.read(frame,0, byteLength));
+        return (ais.read(frame,0, frameByteLength));
     }
 
 
