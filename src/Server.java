@@ -147,7 +147,7 @@ public class Server extends JFrame implements ActionListener {
 
 
 
-        //theServer.audio = new AudioStream("AudioStreamTest1_16bit_44100_Mono.wav");
+        theServer.audio = new AudioStream("AudioStreamTest1_16bit_44100_Mono.wav", 100);
 
 
 
@@ -240,15 +240,15 @@ public class Server extends JFrame implements ActionListener {
                 //print the header bitstream
                 rtp_packet.printheader();
 
-
-                //
-//                try {
-//                    audio.getnextchunk(bufaudio);
-//                    AudioUtilities.playBuffer(bufaudio);
-//                }catch(Exception asdf){
-//                    asdf.printStackTrace();
-//                }
-
+                // play the audio buffer to test the audio stream
+                // TODO send buffer to client
+                try {
+                    audio.getnextframe(bufaudio);
+                    AudioTests.playBuffer(bufaudio);
+                }
+                catch(Exception ex){
+                    ex.printStackTrace();
+                }
                 //update GUI
                 label.setText("Send frame #" + imagenb);
             }
