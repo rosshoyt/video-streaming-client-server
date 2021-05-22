@@ -328,6 +328,25 @@ public class Client{
                 //display the image as an ImageIcon object
                 icon = new ImageIcon(image);
                 iconLabel.setIcon(icon);
+
+
+                // AUDIO stream
+                //receive the DP from the socket:
+                RTPsocket_audio.receive(rcvdp_audio);
+                //create an RTPpacket object from the DP
+                RTPpacket rtp_audio_Packet = new RTPpacket(rcvdp_audio.getData(), rcvdp_audio.getLength());
+                //print important header fields of the RTP packet received:
+                System.out.println("Got RTP Audio packet with SeqNum # "+rtp_audio_Packet.getsequencenumber()+" TimeStamp "+rtp_audio_Packet.gettimestamp()+" ms, of type "+rtp_audio_Packet.getpayloadtype());
+
+                //print header bitstream:
+                rtp_audio_Packet.printheader();
+
+                //get the payload bitstream from the RTPpacket object
+                int payload_length_audio = rtp_audio_Packet.getpayload_length();
+                byte [] payload_audio = new byte[payload_length_audio];
+                rtp_audio_Packet.getpayload(payload_audio);
+                // Play the audio buffer
+                AudioTests.playBuffer(payload_audio);
             }
             catch (InterruptedIOException iioe){
                 //System.out.println("Nothing to read");

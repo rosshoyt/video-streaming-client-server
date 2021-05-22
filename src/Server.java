@@ -147,10 +147,6 @@ public class Server extends JFrame implements ActionListener {
 
 
 
-        theServer.audio = new AudioStream("AudioStreamTest1_16bit_44100_Mono.wav", 100);
-
-
-
         //loop to handle RTSP requests
         while (true) {
             // Wait for initial SETUP request from client
@@ -165,6 +161,8 @@ public class Server extends JFrame implements ActionListener {
                 try {
                     // Check the video file exists (can throw a FileNotFoundException)
                     theServer.video = new VideoStream(VideoFileName);
+                    // Load associated audio stream
+                    theServer.audio = new AudioStream("AudioStreamTest1_16bit_44100_Mono.wav", 100);
                     // File was found, so we'll change server to the READY state
                     state = READY;
                     System.out.println("New RTSP state: READY");
@@ -241,10 +239,27 @@ public class Server extends JFrame implements ActionListener {
                 rtp_packet.printheader();
 
                 // play the audio buffer to test the audio stream
-                // TODO send buffer to client
                 try {
-                    audio.getnextframe(bufaudio);
-                    AudioTests.playBuffer(bufaudio);
+                    //get next frame to send from the video, as well as its size
+                    int audio_length = audio.getnextframe(bufaudio);
+
+                    //Builds an RTPpacket object containing the audio frame
+                    RTPpacket rtp_packet_audio = new RTPpacket(AUDIO_TYPE, imagenb, imagenb*FRAME_PERIOD, bufaudio, audio_length);
+
+                    //get total length of the full rtp packet to send
+                    int packet_length_audio = rtp_packet_audio.getlength();
+
+                    //retrieve the packet bitstream and store it in an array of bytes
+                    byte[] packet_bits_audio = new byte[packet_length_audio];
+                    rtp_packet_audio.getpacket(packet_bits_audio);
+
+                    //send the packet as a DatagramPacket over the UDP socket
+                    senddp = new DatagramPacket(packet_bits_audio, packet_length_audio, ClientIPAddr, RTP_dest_port_audio);
+                    RTPsocket.send(senddp);
+
+                    System.out.println("Send frame #"+imagenb);
+                    //print the header bitstream
+                    rtp_packet_audio.printheader();
                 }
                 catch(Exception ex){
                     ex.printStackTrace();
@@ -318,7 +333,7 @@ public class Server extends JFrame implements ActionListener {
                     for (int i = 0; i < 3; i++)
                         tokens.nextToken();
                     RTP_dest_port = Integer.parseInt(tokens.nextToken());
-                    //RTP_dest_port_audio = Integer.parseInt()
+                    RTP_dest_port_audio = RTP_dest_port + 1;
                 }
                 //else LastLine will be the SessionId line ... do not check for now.
             }
