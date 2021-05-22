@@ -26,12 +26,17 @@ public class Client{
 
     //RTP variables:
     //----------------
-    DatagramPacket rcvdp; //UDP packet received from the server
-    DatagramSocket RTPsocket; //socket to be used to send and receive UDP packets
-    static int RTP_RCV_PORT = 25000; //port where the client will receive the RTP packets
+    DatagramPacket rcvdp_video; //UDP packet received from the server
+    DatagramPacket rcvdp_audio; //UDP packet received from the server
+    DatagramSocket RTPsocket_video; //socket to be used to send and receive UDP packets
+    DatagramSocket RTPsocket_audio; //socket to be used to send and receive UDP audio packets
+    static int RTP_RCV_PORT_VIDEO = 25000; //port where the client will receive the RTP video packets
+    static int RTP_RCV_PORT_AUDIO = 25001; //port where the client will receive the RTP audio packets
+
 
     Timer timer; //timer used to receive data from the UDP socket
-    byte[] buf; //buffer used to store data received from the server
+    byte[] buf_video; //buffer used to store video data received from the server
+    byte[] buf_audio; //buffer used to store audio data received from the server
 
     //RTSP variables
     //----------------
@@ -56,6 +61,7 @@ public class Client{
     //Video constants:
     //------------------
     static int MJPEG_TYPE = 26; //RTP payload type for MJPEG video
+    static int PAYLOAD_TYPE = 11; //RTP payload type for 16 bit 44.khz mono WAV file
 
     // Socket info
     //----
@@ -106,7 +112,8 @@ public class Client{
         timer.setCoalesce(true);
 
         //allocate enough memory for the buffer used to receive data from the server
-        buf = new byte[15000];
+        buf_video = new byte[15000];
+        buf_audio = new byte[15000];
     }
 
     /**
@@ -161,9 +168,11 @@ public class Client{
                 //Init non-blocking RTPsocket that will be used to receive data
                 try{
                     //construct a new DatagramSocket to receive RTP packets from the server, on port RTP_RCV_PORT
-                    RTPsocket = new DatagramSocket(RTP_RCV_PORT);
+                    RTPsocket_video = new DatagramSocket(RTP_RCV_PORT_VIDEO);
+                    //construct a new DatagramSocket to receive RTP packets from the server, on port RTP_RCV_PORT
+                    RTPsocket_audio = new DatagramSocket(RTP_RCV_PORT_AUDIO);
                     //set TimeOut value of the socket to 5msec.
-                    RTPsocket.setSoTimeout(5);
+                    RTPsocket_video.setSoTimeout(5);
                 }
                 catch (SocketException se)
                 {
@@ -294,12 +303,13 @@ public class Client{
     class timerListener implements ActionListener {
         public void actionPerformed(ActionEvent e) {
             //Construct a DatagramPacket to receive data from the UDP socket
-            rcvdp = new DatagramPacket(buf, buf.length);
+            rcvdp_video = new DatagramPacket(buf_video, buf_video.length);
+            rcvdp_audio = new DatagramPacket(buf_audio, buf_audio.length);
             try{
                 //receive the DP from the socket:
-                RTPsocket.receive(rcvdp);
+                RTPsocket_video.receive(rcvdp_video);
                 //create an RTPpacket object from the DP
-                RTPpacket rtp_packet = new RTPpacket(rcvdp.getData(), rcvdp.getLength());
+                RTPpacket rtp_packet = new RTPpacket(rcvdp_video.getData(), rcvdp_video.getLength());
                 //print important header fields of the RTP packet received:
                 System.out.println("Got RTP packet with SeqNum # "+rtp_packet.getsequencenumber()+" TimeStamp "+rtp_packet.gettimestamp()+" ms, of type "+rtp_packet.getpayloadtype());
 
@@ -397,7 +407,8 @@ public class Client{
             //check if request_type is equal to "SETUP" and in this case write the Transport: line
             // advertising to the server the port used to receive the RTP packets RTP_RCV_PORT
             if(request_type.equals("SETUP")){
-                RTSPBufferedWriter.write("Transport: RTP/UDP; client_port= " + RTP_RCV_PORT + CRLF);
+                // TODO pass audio port to server? or assume it to be RTP_RCV_PORT_VIDEO + 1
+                RTSPBufferedWriter.write("Transport: RTP/UDP; client_port= " + RTP_RCV_PORT_VIDEO + CRLF);
             } else {
                 //otherwise, write the Session line from the RTSPid field
                 RTSPBufferedWriter.write("Session: " + RTSPid + CRLF);
@@ -423,8 +434,8 @@ public class Client{
             // close all socket connections
             if(RTSPsocket != null)
                 RTSPsocket.close();
-            if(RTPsocket != null)
-                RTPsocket.close();
+            if(RTPsocket_video != null)
+                RTPsocket_video.close();
         } catch(IOException e){
             e.printStackTrace();
         }
