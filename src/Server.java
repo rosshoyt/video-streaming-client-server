@@ -234,7 +234,7 @@ public class Server extends JFrame implements ActionListener {
                 senddp = new DatagramPacket(packet_bits, packet_length, ClientIPAddr, RTP_dest_port);
                 RTPsocket.send(senddp);
 
-                System.out.println("Send frame #"+imagenb);
+                System.out.println("Sent video frame #"+imagenb);
                 //print the header bitstream
                 rtp_packet.printheader();
 
@@ -257,7 +257,7 @@ public class Server extends JFrame implements ActionListener {
                     senddp = new DatagramPacket(packet_bits_audio, packet_length_audio, ClientIPAddr, RTP_dest_port_audio);
                     RTPsocket.send(senddp);
 
-                    System.out.println("Send frame #"+imagenb);
+                    System.out.println("Sent audio frame #"+imagenb);
                     //print the header bitstream
                     rtp_packet_audio.printheader();
                 }
