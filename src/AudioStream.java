@@ -30,7 +30,7 @@ public class AudioStream {
      * @throws IOException
      * @throws UnsupportedAudioFileException
      */
-    public AudioStream(String filename, double timerRateMS) throws IOException, UnsupportedAudioFileException {
+    public AudioStream(String filename, double timerRateMS) {
         this.timerRateMS = timerRateMS;
         file = new File(filename);
         try{
