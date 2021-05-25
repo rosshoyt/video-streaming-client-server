@@ -98,7 +98,7 @@ public class Server extends JFrame implements ActionListener {
 
         //allocate memory for the sending buffer
         buf = new byte[15000];
-        bufaudio = new byte[15000];
+        bufaudio = new byte[30000]; // TODO make audio buffer smaller by implementing shorter Audio timer
 
         //Handler to close the main window
         addWindowListener(new WindowAdapter() {

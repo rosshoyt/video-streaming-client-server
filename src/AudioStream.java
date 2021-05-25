@@ -54,9 +54,9 @@ public class AudioStream {
         int sampleRateMS = sampleRate / 1000;
         // calculate the number of samples per millisecond
         int frameSampleLengthMS = sampleRateMS * frameLengthMS;
-        this.frameByteLength = frameSampleLengthMS * bitDepthRate / 8;
+        this.frameByteLength = frameSampleLengthMS * bitDepthRate / 4;
         System.out.println("Audio Stream frameByteLength = " + frameByteLength);
-        System.out.println(ais.getFormat());
+        System.out.println(ais.getFormat()  );
     }
 
     /**
