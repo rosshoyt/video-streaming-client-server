@@ -10,7 +10,102 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.Timer;
 
-public class Server extends JFrame implements ActionListener {
+public class Server extends JFrame implements ActionListener, Runnable {
+
+    public void run(){
+        //show GUI:
+        pack();
+        setVisible(true);
+
+        //Initiate TCP connection with the client for the RTSP session
+        ServerSocket listenSocket = null;
+        try {
+            listenSocket = new ServerSocket(RTSP_socket_port);
+            RTSPsocket = listenSocket.accept();
+            listenSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+        //Get Client IP address
+        ClientIPAddr = RTSPsocket.getInetAddress();
+
+        //Initiate RTSPstate
+        Server.state = Server.INIT;
+
+        //Set input and output stream filters:
+        try {
+            Server.RTSPBufferedReader = new BufferedReader(new InputStreamReader(RTSPsocket.getInputStream()));
+            Server.RTSPBufferedWriter = new BufferedWriter(new OutputStreamWriter(RTSPsocket.getOutputStream()));
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+        //loop to handle RTSP requests
+        while (true) {
+            // Wait for initial SETUP request from client
+            int request_type = parse_RTSP_request(); //blocking
+
+            boolean authenticated = authenticate();
+
+            if (!authenticated) {
+                System.out.println("Authentication failed");
+                send_401_response();
+            } else if (request_type == Server.SETUP) {
+                try {
+                    // Check the video file exists (can throw a FileNotFoundException)
+                    video = new VideoStream(Server.VideoFileName);
+                    // Load associated audio stream
+                    audio = new AudioStream("AudioStreamTest1_16bit_44100_Mono.wav", 100);
+                    // File was found, so we'll change server to the READY state
+                    Server.state = Server.READY;
+                    System.out.println("New RTSP state: READY");
+                    //Send response
+                    send_RTSP_response();
+
+                    try{
+                        //init RTP video socket
+                        RTPsocket = new DatagramSocket();
+                        //init RTP audio socket
+                        RTPsocketaudio = new DatagramSocket();
+                    } catch(SocketException se){
+                        se.printStackTrace();
+                        System.exit(-1);
+                    }
+
+                } catch (FileNotFoundException e) {
+                    send_404_response();
+                }
+            } else if ((request_type == Server.PLAY) && (Server.state == Server.READY)) {
+                //send back response
+                send_RTSP_response();
+                //start timer
+                timer.start();
+                //update state
+                Server.state = Server.PLAYING;
+                System.out.println("New RTSP state: PLAYING");
+            } else if ((request_type == Server.PAUSE) && (Server.state == Server.PLAYING)) {
+                //send back response
+                send_RTSP_response();
+                //stop timer
+                timer.stop();
+                //update state
+                Server.state = Server.READY;
+                System.out.println("New RTSP state: READY");
+            } else if (request_type == Server.TEARDOWN) {
+                //send back response
+                send_RTSP_response();
+
+                exit();
+
+            } else if(request_type == Server.UNIMPLEMENTED_MESSAGE_TYPE){
+                System.out.println("Client Response Code " + request_type + " not Implemented  - sending Response Code 501");
+                send_501_response();
+            }
+        }
+    }
 
     //RTP variables:
     //----------------
@@ -23,6 +118,7 @@ public class Server extends JFrame implements ActionListener {
     DatagramPacket senddpaudio;
 
     InetAddress ClientIPAddr; //Client IP address
+    int RTSP_socket_port = 0; // given by Server Application
     int RTP_dest_port = 0; //destination port for RTP packets  (given by the RTSP Client)
     int RTP_dest_port_audio = 1026; // TODO let RTSP Client set port when setting up the audio stream
 
@@ -87,7 +183,7 @@ public class Server extends JFrame implements ActionListener {
     /**
      * Constructs the video streaming server
      */
-    public Server(){
+    public Server(int rtspSocketPort){
         //init Frame
         super("Server");
 
@@ -111,98 +207,6 @@ public class Server extends JFrame implements ActionListener {
         //GUI:
         label = new JLabel("Send frame #        ", JLabel.CENTER);
         getContentPane().add(label, BorderLayout.CENTER);
-    }
-
-    /**
-     * Main method which runs the server program
-     * @param argv RTSP listening port
-     * example: 1025
-     * @throws Exception
-     */
-    public static void main(String argv[]) throws Exception {
-        //create a Server object
-        Server theServer = new Server();
-
-        //show GUI:
-        theServer.pack();
-        theServer.setVisible(true);
-
-        //get RTSP socket port from the command line
-        int RTSPport = Integer.parseInt(argv[0]);
-
-        //Initiate TCP connection with the client for the RTSP session
-        ServerSocket listenSocket = new ServerSocket(RTSPport);
-        theServer.RTSPsocket = listenSocket.accept();
-        listenSocket.close();
-
-        //Get Client IP address
-        theServer.ClientIPAddr = theServer.RTSPsocket.getInetAddress();
-
-        //Initiate RTSPstate
-        state = INIT;
-
-        //Set input and output stream filters:
-        RTSPBufferedReader = new BufferedReader(new InputStreamReader(theServer.RTSPsocket.getInputStream()));
-        RTSPBufferedWriter = new BufferedWriter(new OutputStreamWriter(theServer.RTSPsocket.getOutputStream()));
-
-
-
-        //loop to handle RTSP requests
-        while (true) {
-            // Wait for initial SETUP request from client
-            int request_type = theServer.parse_RTSP_request(); //blocking
-
-            boolean authenticated = theServer.authenticate();
-
-            if (!authenticated) {
-                System.out.println("Authentication failed");
-                theServer.send_401_response();
-            } else if (request_type == SETUP) {
-                try {
-                    // Check the video file exists (can throw a FileNotFoundException)
-                    theServer.video = new VideoStream(VideoFileName);
-                    // Load associated audio stream
-                    theServer.audio = new AudioStream("AudioStreamTest1_16bit_44100_Mono.wav", 100);
-                    // File was found, so we'll change server to the READY state
-                    state = READY;
-                    System.out.println("New RTSP state: READY");
-                    //Send response
-                    theServer.send_RTSP_response();
-                    //init RTP video socket
-                    theServer.RTPsocket = new DatagramSocket();
-                    //init RTP audio socket
-                    theServer.RTPsocketaudio = new DatagramSocket();
-
-                } catch (FileNotFoundException e) {
-                    theServer.send_404_response();
-                }
-            } else if ((request_type == PLAY) && (state == READY)) {
-                //send back response
-                theServer.send_RTSP_response();
-                //start timer
-                theServer.timer.start();
-                //update state
-                state = PLAYING;
-                System.out.println("New RTSP state: PLAYING");
-            } else if ((request_type == PAUSE) && (state == PLAYING)) {
-                //send back response
-                theServer.send_RTSP_response();
-                //stop timer
-                theServer.timer.stop();
-                //update state
-                state = READY;
-                System.out.println("New RTSP state: READY");
-            } else if (request_type == TEARDOWN) {
-                //send back response
-                theServer.send_RTSP_response();
-
-                theServer.exit();
-
-            } else if(request_type == UNIMPLEMENTED_MESSAGE_TYPE){
-                System.out.println("Client Response Code " + request_type + " not Implemented  - sending Response Code 501");
-                theServer.send_501_response();
-            }
-        }
     }
 
     //------------------------
