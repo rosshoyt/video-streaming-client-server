@@ -187,6 +187,8 @@ public class Server extends JFrame implements ActionListener, Runnable {
         //init Frame
         super("Server");
 
+        this.RTSP_socket_port = rtspSocketPort;
+
         //init Timer
         timer = new Timer(FRAME_PERIOD, this);
         timer.setInitialDelay(0);
