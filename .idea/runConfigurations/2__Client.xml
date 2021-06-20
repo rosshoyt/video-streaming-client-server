@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Client" type="Application" factoryName="Application" nameIsGenerated="true">
+  <configuration default="false" name="2: Client" type="Application" factoryName="Application">
     <option name="MAIN_CLASS_NAME" value="Client" />
     <module name="Project2_1" />
     <option name="PROGRAM_PARAMETERS" value="127.0.0.1 1025 movie.Mjpeg johndoe asdf1234" />
