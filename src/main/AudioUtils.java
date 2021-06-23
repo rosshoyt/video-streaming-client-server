@@ -1,3 +1,4 @@
+package main;
 /*
  * Copyright 1999-2004 Carnegie Mellon University.
  * Portions Copyright 2002-2004 Sun Microsystems, Inc.
@@ -14,7 +15,6 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**

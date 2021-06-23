@@ -1,3 +1,4 @@
+package main;
 /**
  * Class which represents a streaming video server
  * usage: java Server [RTSP listening port]
@@ -58,7 +59,7 @@ public class Server extends JFrame implements ActionListener, Runnable {
                     // Check the video file exists (can throw a FileNotFoundException)
                     video = new VideoStream(Server.VideoFileName);
                     // Load associated audio stream
-                    audio = new AudioStream("AudioStreamTest1_16bit_44100_Mono.wav", 100);
+                    audio = new AudioStream("AudioStreamTest1_16bit_44100_Mono.wav", FRAME_PERIOD);
                     // File was found, so we'll change server to the READY state
                     Server.state = Server.READY;
                     System.out.println("New RTSP state: READY");

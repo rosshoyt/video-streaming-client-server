@@ -1,6 +1,4 @@
-import java.io.*;
-import java.net.DatagramSocket;
-import java.net.ServerSocket;
+package main;
 
 public class ServerApplication {
 

@@ -1,4 +1,5 @@
-import javax.sound.sampled.AudioFormat;
+package main;
+
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;

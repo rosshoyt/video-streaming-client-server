@@ -1,4 +1,4 @@
-//VideoStream
+package main;
 
 import java.io.*;
 
@@ -45,8 +45,5 @@ public class VideoStream {
         return  this.frames_per_second;
     }
     private double frames_per_second = 24; // the FPS of the source video file (default = 24)
-
-
-
 
 }

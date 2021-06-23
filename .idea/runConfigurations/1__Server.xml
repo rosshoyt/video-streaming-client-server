@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="1: Server" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="ServerApplication" />
+    <option name="MAIN_CLASS_NAME" value="main.ServerApplication" />
     <module name="Project2_1" />
     <option name="PROGRAM_PARAMETERS" value="1025" />
     <method v="2">

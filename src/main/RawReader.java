@@ -1,3 +1,4 @@
+package main;
 /*
  * Copyright 1999-2004 Carnegie Mellon University.
  * Portions Copyright 2002-2004 Sun Microsystems, Inc.

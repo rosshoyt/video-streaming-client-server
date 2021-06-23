@@ -1,3 +1,5 @@
+package main;
+
 public class RTSPutils {
     // Line delimiter used in RTSP messages TODO make public
     private final static String CRLF = "\r\n";

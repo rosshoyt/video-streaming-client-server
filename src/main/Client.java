@@ -1,7 +1,5 @@
-/**
- * Class which represents a streaming video client
- * usage: java Client [Server hostname] [Server RTSP listening port] [Video file requested]
- */
+package main;
+
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -10,6 +8,10 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.Timer;
 
+/**
+ * Class which represents a streaming video client
+ * usage: java Client [Server hostname] [Server RTSP listening port] [Video file requested]
+ */
 public class Client{
 
     //GUI
@@ -347,7 +349,7 @@ public class Client{
                 rtp_audio_Packet.getpayload(payload_audio);
                 // Play the audio buffer
                 AudioTests.playBuffer(payload_audio);
-            }
+                }
             catch (InterruptedIOException iioe){
                 //System.out.println("Nothing to read");
             }

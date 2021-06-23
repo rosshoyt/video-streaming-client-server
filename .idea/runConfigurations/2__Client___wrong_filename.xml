@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="2: Client - wrong filename" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="Client" />
+    <option name="MAIN_CLASS_NAME" value="main.Client" />
     <module name="Project2_1" />
     <option name="PROGRAM_PARAMETERS" value="127.0.0.1 1025 fake.file johndoe asdf1234" />
     <method v="2">
