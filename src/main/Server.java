@@ -9,9 +9,9 @@ import java.awt.*;
 import java.util.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.Timer;
+import java.util.Timer;
 
-public class Server extends JFrame implements ActionListener, Runnable {
+public class Server extends JFrame implements Runnable {
 
     public void run(){
         //show GUI:
@@ -75,32 +75,28 @@ public class Server extends JFrame implements ActionListener, Runnable {
                         se.printStackTrace();
                         System.exit(-1);
                     }
-
                 } catch (FileNotFoundException e) {
                     send_404_response();
                 }
+                
             } else if ((request_type == Server.PLAY) && (Server.state == Server.READY)) {
                 //send back response
                 send_RTSP_response();
-                //start timer
-                timer.start();
+                startTimer();
                 //update state
                 Server.state = Server.PLAYING;
                 System.out.println("New RTSP state: PLAYING");
             } else if ((request_type == Server.PAUSE) && (Server.state == Server.PLAYING)) {
                 //send back response
                 send_RTSP_response();
-                //stop timer
-                timer.stop();
+                stopTimer();
                 //update state
                 Server.state = Server.READY;
                 System.out.println("New RTSP state: READY");
             } else if (request_type == Server.TEARDOWN) {
                 //send back response
                 send_RTSP_response();
-
                 exit();
-
             } else if(request_type == Server.UNIMPLEMENTED_MESSAGE_TYPE){
                 System.out.println("Client Response Code " + request_type + " not Implemented  - sending Response Code 501");
                 send_501_response();
@@ -132,10 +128,11 @@ public class Server extends JFrame implements ActionListener, Runnable {
     int imagenb = 0; //image nb of the image currently transmitted
     VideoStream video; //VideoStream object used to access video frames
     static int MJPEG_TYPE = 26; //RTP payload type for MJPEG video
-    static int FRAME_PERIOD = 100; //Frame period of the video to stream, in ms
     static int VIDEO_LENGTH = 500; //length of the video in frames
 
-    Timer timer; //timer used to send the images at the video frame rate
+    private Timer timer; // used to periodically send packets to client TODO add separate audio timer
+    static int FRAME_PERIOD = 100; //Frame period of the video to stream, in ms
+
     byte[] buf; //buffer used to store the images to send to the client
 
     //Audio variables:
@@ -190,11 +187,6 @@ public class Server extends JFrame implements ActionListener, Runnable {
 
         this.RTSP_socket_port = rtspSocketPort;
 
-        //init Timer
-        timer = new Timer(FRAME_PERIOD, this);
-        timer.setInitialDelay(0);
-        timer.setCoalesce(true);
-
         //allocate memory for the sending buffer
         buf = new byte[15000];
         bufaudio = new byte[30000]; // TODO make audio buffer smaller by implementing shorter Audio timer
@@ -203,7 +195,7 @@ public class Server extends JFrame implements ActionListener, Runnable {
         addWindowListener(new WindowAdapter() {
             public void windowClosing(WindowEvent e) {
                 //stop the timer and exit
-                timer.stop();
+                stopTimer();
                 System.exit(0);
             }});
 
@@ -212,80 +204,101 @@ public class Server extends JFrame implements ActionListener, Runnable {
         getContentPane().add(label, BorderLayout.CENTER);
     }
 
-    //------------------------
-    //Handler for timer
-    //------------------------
-    public void actionPerformed(ActionEvent e) {
+    /**
+     * Method that starts the timer, which sends RTP packets to client at the specified rate
+     */
+    private void startTimer(){
+        //init timer
+        timer = new Timer();
+        // schedule task to start immediately
+        this.timer.schedule(new TimerAction(),0, FRAME_PERIOD);
+    }
 
-        //if the current image nb is less than the length of the video
-        if (imagenb < VIDEO_LENGTH)
-        {
-            //update current imagenb
-            imagenb++;
+    /**
+     * Method that stops the timer
+     */
+    private void stopTimer(){
+        this.timer.cancel();
+    }
 
-            try {
-                //get next frame to send from the video, as well as its size
-                int image_length = video.getnextframe(buf);
 
-                //Builds an RTPpacket object containing the frame
-                RTPpacket rtp_packet = new RTPpacket(MJPEG_TYPE, imagenb, imagenb*FRAME_PERIOD, buf, image_length);
+    class TimerAction extends TimerTask {
+        @Override
+        public void run() {
 
-                //get to total length of the full rtp packet to send
-                int packet_length = rtp_packet.getlength();
+            //if the current image nb is less than the length of the video
+            if (imagenb < VIDEO_LENGTH)
+            {
+                //update current imagenb
+                imagenb++;
 
-                //retrieve the packet bitstream and store it in an array of bytes
-                byte[] packet_bits = new byte[packet_length];
-                rtp_packet.getpacket(packet_bits);
-
-                //send the packet as a DatagramPacket over the UDP socket
-                senddp = new DatagramPacket(packet_bits, packet_length, ClientIPAddr, RTP_dest_port);
-                RTPsocket.send(senddp);
-
-                System.out.println("Sent video frame #"+imagenb);
-                //print the header bitstream
-                rtp_packet.printheader();
-
-                // play the audio buffer to test the audio stream
                 try {
                     //get next frame to send from the video, as well as its size
-                    int audio_length = audio.getnextframe(bufaudio);
+                    int image_length = video.getnextframe(buf);
 
-                    //Builds an RTPpacket object containing the audio frame
-                    RTPpacket rtp_packet_audio = new RTPpacket(AUDIO_TYPE, imagenb, imagenb*FRAME_PERIOD, bufaudio, audio_length);
+                    //Builds an RTPpacket object containing the frame
+                    RTPpacket rtp_packet = new RTPpacket(MJPEG_TYPE, imagenb, imagenb*FRAME_PERIOD, buf, image_length);
 
-                    //get total length of the full rtp packet to send
-                    int packet_length_audio = rtp_packet_audio.getlength();
+                    //get to total length of the full rtp packet to send
+                    int packet_length = rtp_packet.getlength();
 
                     //retrieve the packet bitstream and store it in an array of bytes
-                    byte[] packet_bits_audio = new byte[packet_length_audio];
-                    rtp_packet_audio.getpacket(packet_bits_audio);
+                    byte[] packet_bits = new byte[packet_length];
+                    rtp_packet.getpacket(packet_bits);
 
                     //send the packet as a DatagramPacket over the UDP socket
-                    senddp = new DatagramPacket(packet_bits_audio, packet_length_audio, ClientIPAddr, RTP_dest_port_audio);
+                    senddp = new DatagramPacket(packet_bits, packet_length, ClientIPAddr, RTP_dest_port);
                     RTPsocket.send(senddp);
 
-                    System.out.println("Sent audio frame #"+imagenb);
+                    System.out.println("Sent video frame #"+imagenb);
                     //print the header bitstream
-                    rtp_packet_audio.printheader();
+                    rtp_packet.printheader();
+
+                    // send the audio buffer
+                    try {
+                        //get next frame to send from the video, as well as its size
+                        int audio_length = audio.getnextframe(bufaudio);
+
+                        //Builds an RTPpacket object containing the audio frame
+                        RTPpacket rtp_packet_audio = new RTPpacket(AUDIO_TYPE, imagenb, imagenb*FRAME_PERIOD, bufaudio, audio_length);
+
+                        //get total length of the full rtp packet to send
+                        int packet_length_audio = rtp_packet_audio.getlength();
+
+                        //retrieve the packet bitstream and store it in an array of bytes
+                        byte[] packet_bits_audio = new byte[packet_length_audio];
+                        rtp_packet_audio.getpacket(packet_bits_audio);
+
+                        //send the packet as a DatagramPacket over the UDP socket
+                        senddp = new DatagramPacket(packet_bits_audio, packet_length_audio, ClientIPAddr, RTP_dest_port_audio);
+                        RTPsocket.send(senddp);
+
+                        System.out.println("Sent audio frame #"+imagenb);
+                        //print the header bitstream
+                        rtp_packet_audio.printheader();
+                    }
+                    catch(Exception ex){
+                        ex.printStackTrace();
+                    }
+                    //update GUI
+                    label.setText("Send frame #" + imagenb);
                 }
-                catch(Exception ex){
+                catch(Exception ex)
+                {
                     ex.printStackTrace();
+                    System.exit(0);
                 }
-                //update GUI
-                label.setText("Send frame #" + imagenb);
             }
-            catch(Exception ex)
+            else
             {
-                ex.printStackTrace();
-                System.exit(0);
+                // we have reached the end of the video file
+                stopTimer();
             }
         }
-        else
-        {
-            //if we have reached the end of the video file, stop the timer
-            timer.stop();
-        }
+
+
     }
+
     //------------------------------------
     //Parse RTSP Request
     //exits program if request is null (Client has closed connection)
@@ -452,7 +465,7 @@ public class Server extends JFrame implements ActionListener, Runnable {
      */
     private void exit(){
         //stop timer
-        timer.stop();
+        stopTimer();
         try{
             // close all socket connections
             if(RTSPsocket != null)
