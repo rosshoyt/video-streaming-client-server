@@ -6,7 +6,7 @@ import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.Timer;
+import java.util.Timer;
 
 /**
  * Class which represents a streaming video client
@@ -36,7 +36,7 @@ public class Client{
     static int RTP_RCV_PORT_AUDIO = 25001; //port where the client will receive the RTP audio packets
 
 
-    Timer timer; //timer used to receive data from the UDP socket
+    private Timer timer; //timer used to receive data from the UDP socket
     byte[] buf_video; //buffer used to store video data received from the server
     byte[] buf_audio; //buffer used to store audio data received from the server
 
@@ -107,17 +107,85 @@ public class Client{
         f.setSize(new Dimension(390,370));
         f.setVisible(true);
 
-        //init timer
-        //--------------------------
-        timer = new Timer(20, new timerListener());
-        timer.setInitialDelay(0);
-        timer.setCoalesce(true);
-
         //allocate enough memory for the buffer used to receive data from the server
         buf_video = new byte[15000];
         buf_audio = new byte[15000];
     }
 
+    /**
+     * Method that starts the timer, which receives RTP packets from server at the specified rate
+     */
+    private void startTimer(){
+        //init timer
+        timer = new Timer();
+        // schedule task to start immediately
+        this.timer.schedule(new TimerAction(),0, 100);
+    }
+
+    /**
+     * Method that stops the timer
+     */
+    private void stopTimer(){
+        this.timer.cancel();
+    }
+
+    class TimerAction extends TimerTask {
+        @Override
+        public void run() {
+            //Construct a DatagramPacket to receive data from the UDP socket
+            rcvdp_video = new DatagramPacket(buf_video, buf_video.length);
+            rcvdp_audio = new DatagramPacket(buf_audio, buf_audio.length);
+            try{
+                //receive the DP from the socket:
+                RTPsocket_video.receive(rcvdp_video);
+                //create an RTPpacket object from the DP
+                RTPpacket rtp_packet = new RTPpacket(rcvdp_video.getData(), rcvdp_video.getLength());
+                //print important header fields of the RTP packet received:
+                System.out.println("Got RTP packet with SeqNum # "+rtp_packet.getsequencenumber()+" TimeStamp "+rtp_packet.gettimestamp()+" ms, of type "+rtp_packet.getpayloadtype());
+
+                //print header bitstream:
+                rtp_packet.printheader();
+
+                //get the payload bitstream from the RTPpacket object
+                int payload_length = rtp_packet.getpayload_length();
+                byte [] payload = new byte[payload_length];
+                rtp_packet.getpayload(payload);
+
+                //get an Image object from the payload bitstream
+                Toolkit toolkit = Toolkit.getDefaultToolkit();
+                Image image = toolkit.createImage(payload, 0, payload_length);
+
+                //display the image as an ImageIcon object
+                icon = new ImageIcon(image);
+                iconLabel.setIcon(icon);
+
+
+                // AUDIO stream
+                //receive the DP from the socket:
+                RTPsocket_audio.receive(rcvdp_audio);
+                //create an RTPpacket object from the DP
+                RTPpacket rtp_audio_Packet = new RTPpacket(rcvdp_audio.getData(), rcvdp_audio.getLength());
+                //print important header fields of the RTP packet received:
+                System.out.println("Got RTP Audio packet with SeqNum # "+rtp_audio_Packet.getsequencenumber()+" TimeStamp "+rtp_audio_Packet.gettimestamp()+" ms, of type "+rtp_audio_Packet.getpayloadtype());
+
+                //print header bitstream:
+                rtp_audio_Packet.printheader();
+
+                //get the payload bitstream from the RTPpacket object
+                int payload_length_audio = rtp_audio_Packet.getpayload_length();
+                byte [] payload_audio = new byte[payload_length_audio];
+                rtp_audio_Packet.getpayload(payload_audio);
+                // Play the audio buffer
+                AudioTests.playBuffer(payload_audio);
+            }
+            catch (InterruptedIOException iioe){
+                //System.out.println("Nothing to read");
+            }
+            catch (IOException ioe) {
+                System.out.println("Exception caught: "+ioe);
+            }
+        }
+    }
     /**
      * Method which runs the Client program
      * @param argv Host IP, Host Port, Requested video file.
@@ -222,8 +290,7 @@ public class Client{
                     //change RTSP state and print out new state
                     state = PLAYING;
                     System.out.println("New RTSP state: PLAYING");
-                    //start the timer
-                    timer.start();
+                    startTimer();
                 }
             }//else if state != READY then do nothing
         }
@@ -254,8 +321,7 @@ public class Client{
                     state = READY;
                     System.out.println("New RTSP state: PAUSE");
 
-                    //stop the timer
-                    timer.stop();
+                    stopTimer();
                 }
             }
             //else if state != PLAYING then do nothing
@@ -290,72 +356,10 @@ public class Client{
             state = INIT;
             System.out.println("New RTSP state: INIT");
 
-            //stop the timer
-            timer.stop();
+            stopTimer();
 
             //exit
             System.exit(0);
-        }
-    }
-
-    //------------------------------------
-    //Handler for timer
-    //------------------------------------
-
-    class timerListener implements ActionListener {
-        public void actionPerformed(ActionEvent e) {
-            //Construct a DatagramPacket to receive data from the UDP socket
-            rcvdp_video = new DatagramPacket(buf_video, buf_video.length);
-            rcvdp_audio = new DatagramPacket(buf_audio, buf_audio.length);
-            try{
-                //receive the DP from the socket:
-                RTPsocket_video.receive(rcvdp_video);
-                //create an RTPpacket object from the DP
-                RTPpacket rtp_packet = new RTPpacket(rcvdp_video.getData(), rcvdp_video.getLength());
-                //print important header fields of the RTP packet received:
-                System.out.println("Got RTP packet with SeqNum # "+rtp_packet.getsequencenumber()+" TimeStamp "+rtp_packet.gettimestamp()+" ms, of type "+rtp_packet.getpayloadtype());
-
-                //print header bitstream:
-                rtp_packet.printheader();
-
-                //get the payload bitstream from the RTPpacket object
-                int payload_length = rtp_packet.getpayload_length();
-                byte [] payload = new byte[payload_length];
-                rtp_packet.getpayload(payload);
-
-                //get an Image object from the payload bitstream
-                Toolkit toolkit = Toolkit.getDefaultToolkit();
-                Image image = toolkit.createImage(payload, 0, payload_length);
-
-                //display the image as an ImageIcon object
-                icon = new ImageIcon(image);
-                iconLabel.setIcon(icon);
-
-
-                // AUDIO stream
-                //receive the DP from the socket:
-                RTPsocket_audio.receive(rcvdp_audio);
-                //create an RTPpacket object from the DP
-                RTPpacket rtp_audio_Packet = new RTPpacket(rcvdp_audio.getData(), rcvdp_audio.getLength());
-                //print important header fields of the RTP packet received:
-                System.out.println("Got RTP Audio packet with SeqNum # "+rtp_audio_Packet.getsequencenumber()+" TimeStamp "+rtp_audio_Packet.gettimestamp()+" ms, of type "+rtp_audio_Packet.getpayloadtype());
-
-                //print header bitstream:
-                rtp_audio_Packet.printheader();
-
-                //get the payload bitstream from the RTPpacket object
-                int payload_length_audio = rtp_audio_Packet.getpayload_length();
-                byte [] payload_audio = new byte[payload_length_audio];
-                rtp_audio_Packet.getpayload(payload_audio);
-                // Play the audio buffer
-                AudioTests.playBuffer(payload_audio);
-                }
-            catch (InterruptedIOException iioe){
-                //System.out.println("Nothing to read");
-            }
-            catch (IOException ioe) {
-                System.out.println("Exception caught: "+ioe);
-            }
         }
     }
 
@@ -449,8 +453,7 @@ public class Client{
      */
     private void exit(){
         System.out.println("Exiting the client program");
-        //stop timer
-        timer.stop();
+        stopTimer();
         try{
             // close all socket connections
             if(RTSPsocket != null)
