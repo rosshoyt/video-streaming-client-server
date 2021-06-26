@@ -17,6 +17,7 @@ public class Client{
     //GUI
     //----
     JFrame f = new JFrame("Client");
+    JButton connectButton = new JButton("Connect");
     JButton setupButton = new JButton("Setup");
     JButton playButton = new JButton("Play");
     JButton pauseButton = new JButton("Pause");
@@ -84,10 +85,12 @@ public class Client{
 
         //Buttons
         buttonPanel.setLayout(new GridLayout(1,0));
+        buttonPanel.add(connectButton);
         buttonPanel.add(setupButton);
         buttonPanel.add(playButton);
         buttonPanel.add(pauseButton);
         buttonPanel.add(tearButton);
+        connectButton.addActionListener(new connectButtonListener());
         setupButton.addActionListener(new setupButtonListener());
         playButton.addActionListener(new playButtonListener());
         pauseButton.addActionListener(new pauseButtonListener());
@@ -186,6 +189,8 @@ public class Client{
             }
         }
     }
+
+
     /**
      * Method which runs the Client program
      * @param argv Host IP, Host Port, Requested video file.
@@ -226,6 +231,16 @@ public class Client{
     //------------------------------------
     //Handler for buttons
     //------------------------------------
+//------------------------------------
+    //Handler for Connect button
+    // When pressed, connects the client to the server
+    //-----------------------
+    class connectButtonListener implements ActionListener{
+        public void actionPerformed(ActionEvent e){
+            System.out.println("Connect Button pressed !");
+
+        }
+    }
 
     //------------------------------------
     //Handler for Setup button
