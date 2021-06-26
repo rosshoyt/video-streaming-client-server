@@ -129,7 +129,8 @@ public class Client{
         //init timer
         timer = new Timer();
         // schedule task to start immediately
-        this.timer.schedule(new TimerAction(),0, 100);
+        this.timer.schedule(new ReceiveVideoDP(),0, StreamConstants.TRANS_SPEED_MS_VIDEO);
+        this.timer.schedule(new ReceiveAudioDP(),0, StreamConstants.TRANS_SPEED_MS_AUDIO);
     }
 
     /**
@@ -139,12 +140,15 @@ public class Client{
         this.timer.cancel();
     }
 
-    class TimerAction extends TimerTask {
+    /**
+     * Timer task class which receives the datagram packet containing the video stream data
+     */
+    class ReceiveVideoDP extends TimerTask {
         @Override
         public void run() {
             //Construct a DatagramPacket to receive data from the UDP socket
             rcvdp_video = new DatagramPacket(buf_video, buf_video.length);
-            rcvdp_audio = new DatagramPacket(buf_audio, buf_audio.length);
+
             try{
                 //receive the DP from the socket:
                 RTPsocket_video.receive(rcvdp_video);
@@ -170,9 +174,29 @@ public class Client{
                 iconLabel.setIcon(icon);
 
 
-                // AUDIO stream
-                //receive the DP from the socket:
-                RTPsocket_audio.receive(rcvdp_audio);
+            }
+            catch (InterruptedIOException iioe){
+                //System.out.println("Nothing to read");
+            }
+            catch (IOException ioe) {
+                System.out.println("Exception caught: "+ioe);
+            }
+        }
+    }
+
+    /**
+     * Timer task class which receives the datagram packet containing the audio stream data
+     */
+    class ReceiveAudioDP extends TimerTask {
+        @Override
+        public void run() {
+
+            rcvdp_audio = new DatagramPacket(buf_audio, buf_audio.length);
+            // AUDIO stream
+            //receive the DP from the socket:
+            try {
+                RTPsocket_audio.receive(rcvdp_audio); // throws IO exception
+
                 //create an RTPpacket object from the DP
                 RTPpacket rtp_audio_Packet = new RTPpacket(rcvdp_audio.getData(), rcvdp_audio.getLength());
                 //print important header fields of the RTP packet received:
@@ -187,18 +211,11 @@ public class Client{
                 rtp_audio_Packet.getpayload(payload_audio);
                 // Play the audio buffer
                 AudioTests.playBuffer(payload_audio);
-            }
-            catch (InterruptedIOException iioe){
-                //System.out.println("Nothing to read");
-            }
-            catch (IOException ioe) {
-                System.out.println("Exception caught: "+ioe);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
-
-
-
 
 
     //------------------------------------
@@ -413,6 +430,7 @@ public class Client{
         catch(Exception ex)
         {
             System.out.println("Exception caught: "+ex);
+            ex.printStackTrace();
             System.exit(0);
         }
 
@@ -448,7 +466,9 @@ public class Client{
         }
         catch(Exception ex)
         {
-            System.out.println("Exception caught: "+ex + "\nExiting");
+            System.out.println("Exception caught: "+ex);
+            ex.printStackTrace();
+            System.out.println("Exiting");
             System.exit(0);
         }
     }

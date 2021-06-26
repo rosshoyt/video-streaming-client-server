@@ -59,7 +59,7 @@ public class Server extends JFrame implements Runnable {
                     // Check the video file exists (can throw a FileNotFoundException)
                     video = new VideoStream(Server.VideoFileName);
                     // Load associated audio stream
-                    audio = new AudioStream("AudioStreamTest1_16bit_44100_Mono.wav", FRAME_PERIOD);
+                    audio = new AudioStream("AudioStreamTest1_16bit_44100_Mono.wav", StreamConstants.TRANS_SPEED_MS_AUDIO);
                     // File was found, so we'll change server to the READY state
                     Server.state = Server.READY;
                     System.out.println("New RTSP state: READY");
@@ -131,7 +131,6 @@ public class Server extends JFrame implements Runnable {
     static int VIDEO_LENGTH = 500; //length of the video in frames
 
     private Timer timer; // used to periodically send packets to client TODO add separate audio timer
-    static int FRAME_PERIOD = 100; //Frame period of the video to stream, in ms
 
     byte[] buf; //buffer used to store the images to send to the client
 
@@ -211,7 +210,8 @@ public class Server extends JFrame implements Runnable {
         //init timer
         timer = new Timer();
         // schedule task to start immediately
-        this.timer.schedule(new TimerAction(),0, FRAME_PERIOD);
+        this.timer.schedule(new SendVideoDP(),0, StreamConstants.TRANS_SPEED_MS_VIDEO);
+        this.timer.schedule(new SendAudioDP(),0, StreamConstants.TRANS_SPEED_MS_AUDIO);
     }
 
     /**
@@ -222,7 +222,7 @@ public class Server extends JFrame implements Runnable {
     }
 
 
-    class TimerAction extends TimerTask {
+    class SendVideoDP extends TimerTask {
         @Override
         public void run() {
 
@@ -237,7 +237,7 @@ public class Server extends JFrame implements Runnable {
                     int image_length = video.getnextframe(buf);
 
                     //Builds an RTPpacket object containing the frame
-                    RTPpacket rtp_packet = new RTPpacket(MJPEG_TYPE, imagenb, imagenb*FRAME_PERIOD, buf, image_length);
+                    RTPpacket rtp_packet = new RTPpacket(MJPEG_TYPE, imagenb, imagenb * StreamConstants.TRANS_SPEED_MS_VIDEO, buf, image_length);
 
                     //get to total length of the full rtp packet to send
                     int packet_length = rtp_packet.getlength();
@@ -254,33 +254,8 @@ public class Server extends JFrame implements Runnable {
                     //print the header bitstream
                     rtp_packet.printheader();
 
-                    // send the audio buffer
-                    try {
-                        //get next frame to send from the video, as well as its size
-                        int audio_length = audio.getnextframe(bufaudio);
 
-                        //Builds an RTPpacket object containing the audio frame
-                        RTPpacket rtp_packet_audio = new RTPpacket(AUDIO_TYPE, imagenb, imagenb*FRAME_PERIOD, bufaudio, audio_length);
-
-                        //get total length of the full rtp packet to send
-                        int packet_length_audio = rtp_packet_audio.getlength();
-
-                        //retrieve the packet bitstream and store it in an array of bytes
-                        byte[] packet_bits_audio = new byte[packet_length_audio];
-                        rtp_packet_audio.getpacket(packet_bits_audio);
-
-                        //send the packet as a DatagramPacket over the UDP socket
-                        senddp = new DatagramPacket(packet_bits_audio, packet_length_audio, ClientIPAddr, RTP_dest_port_audio);
-                        RTPsocket.send(senddp);
-
-                        System.out.println("Sent audio frame #"+imagenb);
-                        //print the header bitstream
-                        rtp_packet_audio.printheader();
-                    }
-                    catch(Exception ex){
-                        ex.printStackTrace();
-                    }
-                    //update GUI
+                    //update GUI TODO update GUI from a different thread
                     label.setText("Send frame #" + imagenb);
                 }
                 catch(Exception ex)
@@ -295,8 +270,38 @@ public class Server extends JFrame implements Runnable {
                 stopTimer();
             }
         }
+    }
 
+    class SendAudioDP extends TimerTask {
+        @Override
+        public void run() {
+            // send the audio buffer
+            try {
+                //get next frame to send from the video, as well as its size
+                int audio_length = audio.getnextframe(bufaudio);
 
+                //Builds an RTPpacket object containing the audio frame
+                RTPpacket rtp_packet_audio = new RTPpacket(AUDIO_TYPE, imagenb, imagenb*StreamConstants.TRANS_SPEED_MS_AUDIO, bufaudio, audio_length);
+
+                //get total length of the full rtp packet to send
+                int packet_length_audio = rtp_packet_audio.getlength();
+
+                //retrieve the packet bitstream and store it in an array of bytes
+                byte[] packet_bits_audio = new byte[packet_length_audio];
+                rtp_packet_audio.getpacket(packet_bits_audio);
+
+                //send the packet as a DatagramPacket over the UDP socket
+                senddp = new DatagramPacket(packet_bits_audio, packet_length_audio, ClientIPAddr, RTP_dest_port_audio);
+                RTPsocket.send(senddp);
+
+                System.out.println("Sent audio frame #"+imagenb);
+                //print the header bitstream
+                rtp_packet_audio.printheader();
+            }
+            catch(IOException ex){
+                ex.printStackTrace();
+            }
+        }
     }
 
     //------------------------------------
