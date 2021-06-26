@@ -210,8 +210,25 @@ public class Client{
     //-----------------------
     class connectButtonListener implements ActionListener{
         public void actionPerformed(ActionEvent e){
-            System.out.println("Connect Button pressed !");
+            System.out.println("Connect Button pressed ! Connecting to ");
+            try {
+                InetAddress ServerIPAddr = InetAddress.getByName(ServerHost);
 
+                //Establish a TCP connection with the server to exchange RTSP messages
+                //------------------
+                RTSPsocket = new Socket(ServerIPAddr, RTSP_server_port);
+
+                //Set input and output stream filters:
+                RTSPBufferedReader = new BufferedReader(new InputStreamReader(RTSPsocket.getInputStream()));
+                RTSPBufferedWriter = new BufferedWriter(new OutputStreamWriter(RTSPsocket.getOutputStream()));
+
+                //init RTSP state:
+                state = INIT;
+
+            }catch(IOException ex){
+                ex.printStackTrace();
+                System.exit(0);
+            }
         }
     }
 
