@@ -48,6 +48,7 @@ public class Client{
     final static int READY = 1;
     final static int PLAYING = 2;
     static int state; //RTSP state == INIT or READY or PLAYING
+    int RTSP_server_port;
     Socket RTSPsocket; //socket used to send/receive RTSP messages
     //input and output stream filters
     static BufferedReader RTSPBufferedReader;
@@ -74,7 +75,13 @@ public class Client{
     /**
      * Constructs the video streaming client
      */
-    public Client() {
+    public Client(String serverHost, int rtsp_server_port, String videoFileName, String username, String password) {
+        this.ServerHost = serverHost;
+        this.RTSP_server_port = rtsp_server_port;
+        this.VideoFileName = videoFileName;
+        this.Username = username;
+        this.Password = password;
+
         //build GUI
         //Frame
         f.addWindowListener(new WindowAdapter() {
@@ -191,41 +198,7 @@ public class Client{
     }
 
 
-    /**
-     * Method which runs the Client program
-     * @param argv Host IP, Host Port, Requested video file.
-     * Example: 127.0.0.1 1025 movie.Mjpeg
-     * @throws Exception
-     */
-    public static void main(String argv[]) throws Exception
-    {
-        //Create a Client object
-        Client theClient = new Client();
 
-        //get server RTSP port and IP address from the command line
-        //------------------
-        int RTSP_server_port = Integer.parseInt(argv[1]);
-        theClient.ServerHost = argv[0];
-        theClient.ServerIPAddr = InetAddress.getByName(theClient.ServerHost);
-
-        //get video filename to request:
-        VideoFileName = argv[2];
-
-        //get username and password to setup the stream:
-        theClient.Username = argv[3];
-        theClient.Password = argv[4];
-
-        //Establish a TCP connection with the server to exchange RTSP messages
-        //------------------
-        theClient.RTSPsocket = new Socket(theClient.ServerIPAddr, RTSP_server_port);
-
-        //Set input and output stream filters:
-        RTSPBufferedReader = new BufferedReader(new InputStreamReader(theClient.RTSPsocket.getInputStream()) );
-        RTSPBufferedWriter = new BufferedWriter(new OutputStreamWriter(theClient.RTSPsocket.getOutputStream()) );
-
-        //init RTSP state:
-        state = INIT;
-    }
 
 
     //------------------------------------
