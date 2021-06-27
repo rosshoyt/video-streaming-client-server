@@ -3,3 +3,5 @@
 uiDesigner.xml
 out/**
 *.pcapng
+.idea/codeStyles/Project.xml
+.idea/dbnavigator.xml
