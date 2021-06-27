@@ -326,13 +326,13 @@ public class Server extends JFrame implements Runnable {
                 String request_type_string = tokens.nextToken();
 
                 //convert to request_type structure:
-                if ((new String(request_type_string)).compareTo("SETUP") == 0)
+                if ((request_type_string).compareTo("SETUP") == 0)
                     request_type = SETUP;
-                else if ((new String(request_type_string)).compareTo("PLAY") == 0)
+                else if ((request_type_string).compareTo("PLAY") == 0)
                     request_type = PLAY;
-                else if ((new String(request_type_string)).compareTo("PAUSE") == 0)
+                else if ((request_type_string).compareTo("PAUSE") == 0)
                     request_type = PAUSE;
-                else if ((new String(request_type_string)).compareTo("TEARDOWN") == 0)
+                else if ((request_type_string).compareTo("TEARDOWN") == 0)
                     request_type = TEARDOWN;
 
                 if (request_type == SETUP) {
